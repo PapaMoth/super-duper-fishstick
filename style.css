@@ -23,7 +23,9 @@ body.screensaver-mode .alarms-section {
   display: none !important;
 }
 
-body.screensaver-mode #screensaver-btn {
+body.screensaver-mode #screensaver-btn,
+body.screensaver-mode #bg-upload-btn,
+body.screensaver-mode #bg-clear-btn {
   display: none !important;
 }
 

@@ -2,7 +2,10 @@
 function pad(n) { return n.toString().padStart(2, "0"); }
 
 const CLOCK_MODE_KEY = "clockapp-clock-mode";
-let clockMode = localStorage.getItem(CLOCK_MODE_KEY) || "digital";
+let clockMode = "digital";
+try {
+  clockMode = localStorage.getItem(CLOCK_MODE_KEY) || "digital";
+} catch (e) { /* storage unavailable (e.g. blocked by browser privacy settings) */ }
 
 const digitalClockEl = document.getElementById("clock");
 const analogClockEl = document.getElementById("analog-clock");
@@ -106,10 +109,14 @@ updateClock();
 
 // ---------- Weather (Open-Meteo, no API key required) ----------
 const weatherBtn = document.getElementById("weather-btn");
-const weatherBody = document.getElementById("weather-body");
+const weatherResult = document.getElementById("weather-result");
 const weatherStatus = document.getElementById("weather-status");
-const trafficBody = document.getElementById("traffic-body");
+const trafficResult = document.getElementById("traffic-result");
 const trafficStatus = document.getElementById("traffic-status");
+
+// Guards against a slower, earlier request overwriting a faster, later one
+// (e.g. clicking Refresh twice in quick succession).
+let weatherRequestId = 0;
 
 const WEATHER_CODES = {
   0: "Clear sky", 1: "Mostly clear", 2: "Partly cloudy", 3: "Overcast",
@@ -122,34 +129,43 @@ const WEATHER_CODES = {
   95: "Thunderstorm", 96: "Thunderstorm w/ hail", 99: "Severe thunderstorm"
 };
 
-weatherBtn.addEventListener("click", () => {
+function requestWeather() {
   if (!navigator.geolocation) {
     weatherStatus.textContent = "Geolocation not supported by this browser.";
     return;
   }
+  const requestId = ++weatherRequestId;
   weatherStatus.textContent = "Locating…";
-  navigator.geolocation.getCurrentPosition(onLocationSuccess, onLocationError, {
-    enableHighAccuracy: false,
-    timeout: 10000
-  });
-});
+  navigator.geolocation.getCurrentPosition(
+    (pos) => onLocationSuccess(pos, requestId),
+    (err) => onLocationError(err, requestId),
+    { enableHighAccuracy: false, timeout: 10000 }
+  );
+}
 
-async function onLocationSuccess(pos) {
+weatherBtn.addEventListener("click", requestWeather);
+
+async function onLocationSuccess(pos, requestId) {
   const { latitude, longitude } = pos.coords;
+  if (requestId !== weatherRequestId) return; // a newer request has started
   weatherStatus.textContent = "Fetching weather…";
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`;
     const res = await fetch(url);
+    if (requestId !== weatherRequestId) return;
     if (!res.ok) throw new Error("Weather request failed");
     const data = await res.json();
+    if (requestId !== weatherRequestId) return;
     renderWeather(data, latitude, longitude);
   } catch (err) {
+    if (requestId !== weatherRequestId) return;
     weatherStatus.textContent = "Could not load weather. " + err.message;
   }
   renderTrafficPlaceholder(latitude, longitude);
 }
 
-function onLocationError(err) {
+function onLocationError(err, requestId) {
+  if (requestId !== weatherRequestId) return;
   weatherStatus.textContent = "Location permission denied or unavailable.";
   trafficStatus.textContent = "Location permission denied — traffic unavailable.";
 }
@@ -157,7 +173,9 @@ function onLocationError(err) {
 function renderWeather(data, lat, lon) {
   const c = data.current;
   const desc = WEATHER_CODES[c.weather_code] || "Unknown conditions";
-  weatherBody.innerHTML = `
+  weatherStatus.textContent = "";
+  weatherBtn.textContent = "Refresh";
+  weatherResult.innerHTML = `
     <div class="weather-location">Lat ${lat.toFixed(2)}, Lon ${lon.toFixed(2)}</div>
     <div class="weather-main">
       <div class="weather-temp">${Math.round(c.temperature_2m)}°F</div>
@@ -167,18 +185,13 @@ function renderWeather(data, lat, lon) {
       </div>
     </div>
     <div class="weather-detail">Humidity ${c.relative_humidity_2m}% · Wind ${Math.round(c.wind_speed_10m)} mph</div>
-    <button id="weather-btn" class="btn">Refresh</button>
   `;
-  document.getElementById("weather-btn").addEventListener("click", () => {
-    weatherStatus.textContent = "Locating…";
-    navigator.geolocation.getCurrentPosition(onLocationSuccess, onLocationError);
-  });
 }
 
 // Traffic: no key-free live traffic API exists, so we link out to a map
 // centered on the user's coordinates rather than fake live data.
 function renderTrafficPlaceholder(lat, lon) {
-  trafficBody.innerHTML = `
+  trafficResult.innerHTML = `
     <div>Live traffic data requires a mapping API key (e.g. Google Maps, TomTom, HERE).</div>
     <a class="btn" style="text-decoration:none;display:inline-block;margin-top:8px"
        href="https://www.google.com/maps/@${lat},${lon},12z/data=!5m1!1e1" target="_blank" rel="noopener">
@@ -188,9 +201,14 @@ function renderTrafficPlaceholder(lat, lon) {
 }
 
 // ---------- Timers ----------
+// Countdown is derived from a wall-clock end timestamp rather than counted
+// down one setInterval tick at a time, so a throttled/backgrounded tab
+// (where callbacks fire late or are coalesced) doesn't make the timer run
+// slow — each tick just recomputes remaining time from Date.now().
 document.querySelectorAll(".timer-card").forEach((card) => {
   const totalSeconds = parseInt(card.dataset.minutes, 10) * 60;
   let remaining = totalSeconds;
+  let endTime = null; // Date.now()-based deadline while running
   let intervalId = null;
   const display = card.querySelector("[data-display]");
 
@@ -202,12 +220,12 @@ document.querySelectorAll(".timer-card").forEach((card) => {
   }
 
   function tick() {
-    remaining -= 1;
+    remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000));
     if (remaining <= 0) {
-      remaining = 0;
       render();
       clearInterval(intervalId);
       intervalId = null;
+      endTime = null;
       playBeep();
       return;
     }
@@ -216,15 +234,18 @@ document.querySelectorAll(".timer-card").forEach((card) => {
 
   card.querySelector('[data-action="start"]').addEventListener("click", () => {
     if (intervalId || remaining <= 0) return;
+    endTime = Date.now() + remaining * 1000;
     intervalId = setInterval(tick, 1000);
   });
   card.querySelector('[data-action="pause"]').addEventListener("click", () => {
     clearInterval(intervalId);
     intervalId = null;
+    endTime = null;
   });
   card.querySelector('[data-action="reset"]').addEventListener("click", () => {
     clearInterval(intervalId);
     intervalId = null;
+    endTime = null;
     remaining = totalSeconds;
     render();
   });
@@ -340,18 +361,31 @@ alarmCards.forEach((card, i) => {
   });
 });
 
+// Checks against elapsed wall-clock minutes rather than requiring the exact
+// current minute to be observed, so a throttled/backgrounded tab that misses
+// a tick (e.g. two polls land in the same minute, or a minute is skipped
+// entirely) still fires the alarm instead of silently missing it.
+let lastCheckedMinutes = Math.floor(Date.now() / 60000);
+
 function checkAlarms() {
   const now = new Date();
-  const hh = pad(now.getHours());
-  const mm = pad(now.getMinutes());
-  const current = `${hh}:${mm}`;
   const todayKey = now.toDateString();
+  const nowMinutes = Math.floor(now.getTime() / 60000);
+  if (nowMinutes === lastCheckedMinutes) return;
+  const sinceLastCheck = Math.min(nowMinutes - lastCheckedMinutes, 1440); // cap at a day
+  lastCheckedMinutes = nowMinutes;
 
   alarmCards.forEach((card, i) => {
     const enabled = card.querySelector(".alarm-enabled").checked;
     const time = card.querySelector(".alarm-time").value;
     if (!enabled || !time) return;
-    if (time === current && card.dataset.firedToday !== todayKey) {
+    const [alarmHour, alarmMinute] = time.split(":").map(Number);
+    const alarmDate = new Date(now);
+    alarmDate.setHours(alarmHour, alarmMinute, 0, 0);
+    const alarmMinutes = Math.floor(alarmDate.getTime() / 60000);
+    const minutesSinceAlarm = nowMinutes - alarmMinutes;
+    const alarmWasCrossed = minutesSinceAlarm >= 0 && minutesSinceAlarm < sinceLastCheck;
+    if (alarmWasCrossed && card.dataset.firedToday !== todayKey) {
       card.dataset.firedToday = todayKey;
       triggerAlarm(i, time);
     }
@@ -364,6 +398,7 @@ function triggerAlarm(cardIndex, time) {
   alarmOverlayText.textContent = `Alarm ${cardIndex + 1} — ${time}`;
   alarmOverlay.classList.remove("hidden");
   playAlarmSound(cardIndex);
+  if (ringingInterval) clearInterval(ringingInterval);
   ringingInterval = setInterval(() => playAlarmSound(cardIndex), 1200);
 }
 
@@ -376,10 +411,38 @@ alarmDismissBtn.addEventListener("click", () => {
   ringingAlarmIndex = null;
 });
 
+// The default alert sound is generated with the Web Audio API so it's
+// guaranteed to be audible (a static embedded WAV with an empty data chunk
+// was previously used and produced no sound at all).
+let sharedAudioCtx = null;
+function getAudioContext() {
+  if (!sharedAudioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    sharedAudioCtx = new Ctx();
+  }
+  if (sharedAudioCtx.state === "suspended") {
+    sharedAudioCtx.resume().catch(() => { /* ignore */ });
+  }
+  return sharedAudioCtx;
+}
+
 function playBeep() {
-  const audio = document.getElementById("beep-sound");
-  audio.currentTime = 0;
-  audio.play().catch(() => { /* autoplay may be blocked until user interacts */ });
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  const duration = 0.35;
+  const now = ctx.currentTime;
+  const oscillator = ctx.createOscillator();
+  const gain = ctx.createGain();
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(880, now);
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(0.3, now + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+  oscillator.connect(gain);
+  gain.connect(ctx.destination);
+  oscillator.start(now);
+  oscillator.stop(now + duration);
 }
 
 function playAlarmSound(cardIndex) {
@@ -408,7 +471,10 @@ const trackerCount = document.getElementById("tracker-count");
 
 function loadTrackedAssets() {
   try {
-    return JSON.parse(localStorage.getItem(TRACKER_STORAGE_KEY) || "[]");
+    const saved = JSON.parse(localStorage.getItem(TRACKER_STORAGE_KEY) || "[]");
+    // Enforce the cap here too, in case it was lowered after assets were
+    // already saved by an earlier version of the app.
+    return Array.isArray(saved) ? saved.slice(0, MAX_TRACKED_ASSETS) : [];
   } catch (e) {
     return [];
   }
@@ -418,9 +484,8 @@ function saveTrackedAssets(assets) {
   try { localStorage.setItem(TRACKER_STORAGE_KEY, JSON.stringify(assets)); } catch (e) { /* storage unavailable */ }
 }
 
-let trackedAssets = loadTrackedAssets();
-
 const MAX_TRACKED_ASSETS = 6;
+let trackedAssets = loadTrackedAssets();
 
 trackerAddBtn.addEventListener("click", () => {
   const rawSymbol = trackerSymbolInput.value.trim();
@@ -461,23 +526,45 @@ function renderTrackerList() {
   trackerSymbolInput.disabled = atLimit;
   trackerCount.textContent = `${trackedAssets.length} / ${MAX_TRACKED_ASSETS} tickers`;
 
+  trackerList.innerHTML = "";
+
   if (trackedAssets.length === 0) {
-    trackerList.innerHTML = `<div class="status">No assets tracked yet. Add a crypto id (e.g. "bitcoin", "ethereum") or a stock ticker (e.g. "AAPL").</div>`;
+    const empty = document.createElement("div");
+    empty.className = "status";
+    empty.textContent = 'No assets tracked yet. Add a crypto id (e.g. "bitcoin", "ethereum") or a stock ticker (e.g. "AAPL").';
+    trackerList.appendChild(empty);
     return;
   }
-  trackerList.innerHTML = trackedAssets.map((a) => `
-    <div class="tracker-item" data-id="${a.id}" data-type="${a.type}">
-      <span class="tracker-item-name">${a.id} <small style="color:var(--text-dim)">(${a.type})</small></span>
-      <span class="tracker-item-price" data-price>Loading…</span>
-      <button class="tracker-remove" data-remove>✕</button>
-    </div>
-  `).join("");
 
-  trackerList.querySelectorAll("[data-remove]").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      const item = e.target.closest(".tracker-item");
-      removeTrackedAsset(item.dataset.id, item.dataset.type);
-    });
+  // Built with DOM APIs (not innerHTML + template interpolation) because
+  // asset.id comes straight from user input and must never be parsed as HTML.
+  trackedAssets.forEach((a) => {
+    const item = document.createElement("div");
+    item.className = "tracker-item";
+    item.dataset.id = a.id;
+    item.dataset.type = a.type;
+
+    const name = document.createElement("span");
+    name.className = "tracker-item-name";
+    name.append(`${a.id} `);
+    const typeLabel = document.createElement("small");
+    typeLabel.style.color = "var(--text-dim)";
+    typeLabel.textContent = `(${a.type})`;
+    name.appendChild(typeLabel);
+
+    const price = document.createElement("span");
+    price.className = "tracker-item-price";
+    price.dataset.price = "";
+    price.textContent = "Loading…";
+
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "tracker-remove";
+    removeBtn.dataset.remove = "";
+    removeBtn.textContent = "✕";
+    removeBtn.addEventListener("click", () => removeTrackedAsset(a.id, a.type));
+
+    item.append(name, price, removeBtn);
+    trackerList.appendChild(item);
   });
 
   refreshTrackerPrices();
@@ -510,20 +597,36 @@ async function fetchStockPrice(symbol) {
   return { price: close, changePct };
 }
 
+let trackerRefreshInProgress = false;
+
 async function refreshTrackerPrices() {
-  for (const asset of trackedAssets) {
-    const el = trackerList.querySelector(`.tracker-item[data-id="${CSS.escape(asset.id)}"][data-type="${asset.type}"] [data-price]`);
-    if (!el) continue;
-    try {
-      const { price, changePct } = asset.type === "crypto"
-        ? await fetchCryptoPrice(asset.id)
-        : await fetchStockPrice(asset.id);
-      const dir = changePct >= 0 ? "up" : "down";
-      const sign = changePct >= 0 ? "+" : "";
-      el.innerHTML = `$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span class="tracker-item-change ${dir}">${sign}${changePct.toFixed(2)}%</span>`;
-    } catch (err) {
-      el.textContent = "Unavailable";
+  // A slow upstream response (Stooq/CoinGecko hanging) could otherwise let
+  // the next 60s interval start a second overlapping pass over the same
+  // assets, multiplying outbound requests and worsening rate limiting.
+  if (trackerRefreshInProgress) return;
+  trackerRefreshInProgress = true;
+  try {
+    for (const asset of trackedAssets) {
+      const el = trackerList.querySelector(`.tracker-item[data-id="${CSS.escape(asset.id)}"][data-type="${asset.type}"] [data-price]`);
+      if (!el) continue;
+      try {
+        const { price, changePct } = asset.type === "crypto"
+          ? await fetchCryptoPrice(asset.id)
+          : await fetchStockPrice(asset.id);
+        const dir = changePct >= 0 ? "up" : "down";
+        const sign = changePct >= 0 ? "+" : "";
+        el.textContent = "";
+        el.append(`$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })} `);
+        const change = document.createElement("span");
+        change.className = `tracker-item-change ${dir}`;
+        change.textContent = `${sign}${changePct.toFixed(2)}%`;
+        el.appendChild(change);
+      } catch (err) {
+        el.textContent = "Unavailable";
+      }
     }
+  } finally {
+    trackerRefreshInProgress = false;
   }
 }
 
@@ -544,19 +647,21 @@ setInterval(refreshTrackerPrices, 60000);
 })();
 
 // ---------- Screensaver Mode ----------
-// Goes fullscreen, hides the ad slots and the tracker/timer/alarm panels so
-// only the clock and weather stay on screen, and hides the cursor after a
-// few seconds of inactivity. Any key press, click, or mouse move exits.
+// Hides the ad slots and the tracker/timer/alarm panels so only the clock
+// and weather stay on screen, and hides the cursor after a few seconds of
+// inactivity. Any key press, click, or mouse move exits.
 const screensaverBtn = document.getElementById("screensaver-btn");
-const appGrid = document.querySelector(".app-grid");
 let screensaverActive = false;
 let cursorIdleTimeout = null;
 
-function enterScreensaverMode() {
+function enterScreensaverMode(manual) {
   if (screensaverActive) return;
   screensaverActive = true;
   document.body.classList.add("screensaver-mode");
-  if (document.documentElement.requestFullscreen) {
+  // Browsers only grant fullscreen in direct response to a user gesture, so
+  // only request it when the button triggered entry — requesting it from
+  // the automatic idle timer would just be silently rejected.
+  if (manual && document.documentElement.requestFullscreen) {
     document.documentElement.requestFullscreen().catch(() => { /* fullscreen may be blocked */ });
   }
   resetCursorIdleTimer();
@@ -576,6 +681,7 @@ function exitScreensaverMode() {
   document.removeEventListener("mousemove", onScreensaverActivity);
   document.removeEventListener("keydown", onScreensaverActivity);
   document.removeEventListener("click", onScreensaverActivity);
+  resetAutoScreensaverTimer();
 }
 
 function resetCursorIdleTimer() {
@@ -586,26 +692,17 @@ function resetCursorIdleTimer() {
   }, 3000);
 }
 
-let screensaverActivityArmed = false;
-function onScreensaverActivity(e) {
-  // The click/keydown that triggers screensaver mode would otherwise also
-  // be seen as the "exit" signal; ignore the first event right after entry.
-  if (!screensaverActivityArmed) {
-    screensaverActivityArmed = true;
-    resetCursorIdleTimer();
-    return;
-  }
-  if (e.type === "mousemove") {
-    resetCursorIdleTimer();
-    return;
-  }
+function onScreensaverActivity() {
+  // The button click that enters screensaver mode calls stopPropagation
+  // below, so it never reaches these document-level listeners (which are
+  // only attached once already inside screensaver mode) — any event here is
+  // a genuine exit signal, including mouse movement.
   exitScreensaverMode();
-  screensaverActivityArmed = false;
 }
 
 screensaverBtn.addEventListener("click", (e) => {
   e.stopPropagation();
-  enterScreensaverMode();
+  enterScreensaverMode(true);
 });
 
 document.addEventListener("fullscreenchange", () => {
@@ -623,7 +720,7 @@ function resetAutoScreensaverTimer() {
   clearTimeout(autoScreensaverTimeout);
   if (screensaverActive) return;
   autoScreensaverTimeout = setTimeout(() => {
-    if (!screensaverActive) enterScreensaverMode();
+    if (!screensaverActive) enterScreensaverMode(false);
   }, AUTO_SCREENSAVER_IDLE_MS);
 }
 
@@ -652,6 +749,8 @@ function applyBackgroundImage(dataUrl) {
 
 bgUploadBtn.addEventListener("click", () => bgUploadInput.click());
 
+let bgUploadRequestId = 0;
+
 bgUploadInput.addEventListener("change", () => {
   const file = bgUploadInput.files && bgUploadInput.files[0];
   if (!file) return;
@@ -659,8 +758,10 @@ bgUploadInput.addEventListener("change", () => {
     alert("Please choose an image file.");
     return;
   }
+  const requestId = ++bgUploadRequestId;
   const reader = new FileReader();
   reader.onload = () => {
+    if (requestId !== bgUploadRequestId) return; // a newer upload has started
     const dataUrl = reader.result;
     applyBackgroundImage(dataUrl);
     try { localStorage.setItem(BG_IMAGE_STORAGE_KEY, dataUrl); } catch (e) {
