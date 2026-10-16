@@ -118,41 +118,6 @@ body.has-bg-image .center {
 .ad-left { grid-area: left; }
 .ad-right { grid-area: right; }
 
-body.ads-removed .ad {
-  display: none !important;
-}
-
-body.ads-removed .app-grid {
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr;
-  grid-template-areas: "center";
-}
-
-.remove-ads-banner {
-  position: fixed;
-  bottom: 100px;
-  right: 16px;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 0.85rem;
-  color: var(--text-dim);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
-
-.remove-ads-banner a.btn {
-  text-decoration: none;
-}
-
-body.ads-removed .remove-ads-banner,
-body.screensaver-mode .remove-ads-banner {
-  display: none !important;
-}
 
 .center {
   grid-area: center;
