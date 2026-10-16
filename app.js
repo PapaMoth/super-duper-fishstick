@@ -478,3 +478,74 @@ setInterval(refreshTrackerPrices, 60000);
     main.style.transform = `translate(${x}px, ${y}px)`;
   }, 4000);
 })();
+
+// ---------- Screensaver Mode ----------
+// Goes fullscreen, hides the ad slots and the tracker/timer/alarm panels so
+// only the clock and weather stay on screen, and hides the cursor after a
+// few seconds of inactivity. Any key press, click, or mouse move exits.
+const screensaverBtn = document.getElementById("screensaver-btn");
+const appGrid = document.querySelector(".app-grid");
+let screensaverActive = false;
+let cursorIdleTimeout = null;
+
+function enterScreensaverMode() {
+  if (screensaverActive) return;
+  screensaverActive = true;
+  document.body.classList.add("screensaver-mode");
+  if (document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().catch(() => { /* fullscreen may be blocked */ });
+  }
+  resetCursorIdleTimer();
+  document.addEventListener("mousemove", onScreensaverActivity);
+  document.addEventListener("keydown", onScreensaverActivity);
+  document.addEventListener("click", onScreensaverActivity);
+}
+
+function exitScreensaverMode() {
+  if (!screensaverActive) return;
+  screensaverActive = false;
+  document.body.classList.remove("screensaver-mode", "cursor-hidden");
+  clearTimeout(cursorIdleTimeout);
+  if (document.fullscreenElement) {
+    document.exitFullscreen().catch(() => { /* ignore */ });
+  }
+  document.removeEventListener("mousemove", onScreensaverActivity);
+  document.removeEventListener("keydown", onScreensaverActivity);
+  document.removeEventListener("click", onScreensaverActivity);
+}
+
+function resetCursorIdleTimer() {
+  document.body.classList.remove("cursor-hidden");
+  clearTimeout(cursorIdleTimeout);
+  cursorIdleTimeout = setTimeout(() => {
+    document.body.classList.add("cursor-hidden");
+  }, 3000);
+}
+
+let screensaverActivityArmed = false;
+function onScreensaverActivity(e) {
+  // The click/keydown that triggers screensaver mode would otherwise also
+  // be seen as the "exit" signal; ignore the first event right after entry.
+  if (!screensaverActivityArmed) {
+    screensaverActivityArmed = true;
+    resetCursorIdleTimer();
+    return;
+  }
+  if (e.type === "mousemove") {
+    resetCursorIdleTimer();
+    return;
+  }
+  exitScreensaverMode();
+  screensaverActivityArmed = false;
+}
+
+screensaverBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  enterScreensaverMode();
+});
+
+document.addEventListener("fullscreenchange", () => {
+  if (!document.fullscreenElement && screensaverActive) {
+    exitScreensaverMode();
+  }
+});

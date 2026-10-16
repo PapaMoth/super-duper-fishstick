@@ -15,6 +15,34 @@
 
 .hidden { display: none !important; }
 
+body.screensaver-mode .ad,
+body.screensaver-mode .tracker-section,
+body.screensaver-mode .traffic-section,
+body.screensaver-mode .timers-section,
+body.screensaver-mode .alarms-section {
+  display: none !important;
+}
+
+body.screensaver-mode #screensaver-btn {
+  display: none !important;
+}
+
+body.screensaver-mode .app-grid {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  grid-template-areas: "center";
+}
+
+body.screensaver-mode .center {
+  justify-content: center;
+  height: 100vh;
+}
+
+body.screensaver-mode.cursor-hidden,
+body.screensaver-mode.cursor-hidden * {
+  cursor: none !important;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

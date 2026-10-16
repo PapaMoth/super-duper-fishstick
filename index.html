@@ -4,20 +4,44 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Desktop Clock — Weather, Timers, Alarms &amp; Market Tracker</title>
-<meta name="description" content="A free one-page clock dashboard with digital or analog display, live local weather, traffic links, 30-minute/1-hour/3-hour timers, three alarms, and a stock &amp; crypto price tracker. Built to run as a screensaver.">
-<meta name="keywords" content="clock app, digital clock, analog clock, weather clock, alarm clock, countdown timer, stock tracker, crypto tracker, screensaver clock">
+<meta name="description" content="A free one-page clock dashboard with a switchable digital or analog display, a dedicated fullscreen screensaver mode, live local weather, traffic links, 30-minute/1-hour/3-hour timers, three alarms, and a stock &amp; crypto price tracker (up to 6 tickers).">
+<meta name="keywords" content="clock app, digital clock, analog clock, digital analog clock toggle, screensaver, screensaver clock, fullscreen clock, weather clock, alarm clock, countdown timer, stock tracker, crypto tracker">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://github.com/PapaMoth/super-duper-fishstick">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="Desktop Clock — Weather, Timers, Alarms &amp; Market Tracker">
-<meta property="og:description" content="A free one-page clock dashboard with digital or analog display, live local weather, timers, alarms, and a stock &amp; crypto tracker.">
+<meta property="og:description" content="A free one-page clock dashboard with a switchable digital or analog display, a fullscreen screensaver mode, live local weather, timers, alarms, and a stock &amp; crypto tracker.">
 
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Desktop Clock — Weather, Timers, Alarms &amp; Market Tracker">
-<meta name="twitter:description" content="A free one-page clock dashboard with digital or analog display, live local weather, timers, alarms, and a stock &amp; crypto tracker.">
+<meta name="twitter:description" content="A free one-page clock dashboard with a switchable digital or analog display, a fullscreen screensaver mode, live local weather, timers, alarms, and a stock &amp; crypto tracker.">
 
 <link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Desktop Clock — Weather, Timers, Alarms & Market Tracker",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "description": "A free one-page clock dashboard that switches between a digital or analog display, shows live local weather and traffic, runs three preset countdown timers and three alarms, tracks up to six stocks or crypto tickers, and includes a dedicated fullscreen screensaver mode.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "Digital or analog clock display",
+    "Fullscreen screensaver mode",
+    "Location-based weather",
+    "Traffic map link",
+    "30 minute, 1 hour, and 3 hour countdown timers",
+    "Three configurable alarms",
+    "Stock and crypto ticker tracker (up to 6 tickers)"
+  ]
+}
+</script>
 </head>
 <body>
 <div class="app-grid">
@@ -35,6 +59,7 @@
       <div class="clock-toggle">
         <button class="btn small toggle-btn active" data-clock-mode="digital">Digital</button>
         <button class="btn small toggle-btn" data-clock-mode="analog">Analog</button>
+        <button id="screensaver-btn" class="btn small">Screensaver Mode</button>
       </div>
       <div id="clock" class="clock">00:00:00</div>
       <canvas id="analog-clock" class="analog-clock hidden" width="280" height="280"></canvas>
