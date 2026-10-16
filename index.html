@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clock, Weather, Timers &amp; Alarms</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-grid">
+
+  <!-- Top ad banner -->
+  <div class="ad ad-top">Ad Space — 728x90 Leaderboard</div>
+
+  <!-- Left ad rail -->
+  <div class="ad ad-left">Ad<br>160x600</div>
+
+  <!-- Center: clock, weather, timers, alarms -->
+  <main class="center">
+    <section class="clock-section">
+      <div id="clock" class="clock">00:00:00</div>
+      <div id="date" class="date">Loading date…</div>
+    </section>
+
+    <section class="weather-section">
+      <h2>Weather</h2>
+      <div id="weather-body" class="weather-body">
+        <button id="weather-btn" class="btn">Use My Location</button>
+        <span id="weather-status" class="status"></span>
+      </div>
+    </section>
+
+    <section class="traffic-section">
+      <h2>Traffic</h2>
+      <div id="traffic-body" class="traffic-body">
+        <span id="traffic-status" class="status">Share location above to see local traffic conditions.</span>
+      </div>
+    </section>
+
+    <section class="timers-section">
+      <h2>Timers</h2>
+      <div class="timers-grid">
+        <div class="timer-card" data-minutes="30">
+          <div class="timer-label">30 min</div>
+          <div class="timer-display" data-display>30:00</div>
+          <div class="timer-controls">
+            <button class="btn small" data-action="start">Start</button>
+            <button class="btn small" data-action="pause">Pause</button>
+            <button class="btn small" data-action="reset">Reset</button>
+          </div>
+        </div>
+        <div class="timer-card" data-minutes="60">
+          <div class="timer-label">1 hour</div>
+          <div class="timer-display" data-display>60:00</div>
+          <div class="timer-controls">
+            <button class="btn small" data-action="start">Start</button>
+            <button class="btn small" data-action="pause">Pause</button>
+            <button class="btn small" data-action="reset">Reset</button>
+          </div>
+        </div>
+        <div class="timer-card" data-minutes="180">
+          <div class="timer-label">3 hours</div>
+          <div class="timer-display" data-display>180:00</div>
+          <div class="timer-controls">
+            <button class="btn small" data-action="start">Start</button>
+            <button class="btn small" data-action="pause">Pause</button>
+            <button class="btn small" data-action="reset">Reset</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="alarms-section">
+      <h2>Alarms</h2>
+      <div class="alarms-grid">
+        <div class="alarm-card" data-index="0">
+          <div class="alarm-row">
+            <input type="time" class="alarm-time" />
+            <label class="switch">
+              <input type="checkbox" class="alarm-enabled" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="alarm-status" data-status>Off</div>
+        </div>
+        <div class="alarm-card" data-index="1">
+          <div class="alarm-row">
+            <input type="time" class="alarm-time" />
+            <label class="switch">
+              <input type="checkbox" class="alarm-enabled" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="alarm-status" data-status>Off</div>
+        </div>
+        <div class="alarm-card" data-index="2">
+          <div class="alarm-row">
+            <input type="time" class="alarm-time" />
+            <label class="switch">
+              <input type="checkbox" class="alarm-enabled" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="alarm-status" data-status>Off</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Right ad rail -->
+  <div class="ad ad-right">Ad<br>160x600</div>
+
+  <!-- Bottom ad banner -->
+  <div class="ad ad-bottom">Ad Space — 728x90 Leaderboard</div>
+
+</div>
+
+<div id="alarm-overlay" class="alarm-overlay hidden">
+  <div class="alarm-overlay-content">
+    <div class="alarm-ring-icon">⏰</div>
+    <div id="alarm-overlay-text">Alarm</div>
+    <button id="alarm-dismiss" class="btn">Dismiss</button>
+  </div>
+</div>
+
+<audio id="beep-sound" preload="auto">
+  <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQQAAAAAAAA=" type="audio/wav">
+</audio>
+
+<script src="app.js"></script>
+</body>
+</html>

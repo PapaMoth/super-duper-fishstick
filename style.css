@@ -1,0 +1,299 @@
+:root {
+  --bg: #0b0f1a;
+  --panel: #141a2a;
+  --panel-border: #2a3550;
+  --accent: #4fd1c5;
+  --accent-soft: #2c7a74;
+  --text: #e8ecf5;
+  --text-dim: #8d98b3;
+  --ad-bg: #1b2235;
+  --ad-border: #394768;
+  --danger: #ff6b6b;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow: hidden;
+}
+
+.app-grid {
+  display: grid;
+  grid-template-columns: 160px 1fr 160px;
+  grid-template-rows: 90px 1fr 90px;
+  grid-template-areas:
+    "top   top    top"
+    "left  center right"
+    "bottom bottom bottom";
+  height: 100vh;
+  width: 100vw;
+  gap: 8px;
+  padding: 8px;
+}
+
+.ad {
+  background: repeating-linear-gradient(45deg, var(--ad-bg), var(--ad-bg) 10px, #202a42 10px, #202a42 20px);
+  border: 2px dashed var(--ad-border);
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  letter-spacing: 0.03em;
+}
+
+.ad-top { grid-area: top; }
+.ad-bottom { grid-area: bottom; }
+.ad-left { grid-area: left; }
+.ad-right { grid-area: right; }
+
+.center {
+  grid-area: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 18px;
+  overflow-y: auto;
+  padding: 10px 20px;
+}
+
+.clock-section {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.clock {
+  font-size: clamp(3.5rem, 9vw, 7rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  text-shadow: 0 0 18px rgba(79, 209, 197, 0.35);
+}
+
+.date {
+  font-size: 1.1rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+section h2 {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin: 0 0 10px;
+  text-align: center;
+}
+
+.weather-section, .traffic-section, .timers-section, .alarms-section {
+  width: 100%;
+  max-width: 640px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.weather-body, .traffic-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.weather-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+}
+
+.weather-temp {
+  font-size: 2.4rem;
+  font-weight: 600;
+}
+
+.weather-detail {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+}
+
+.weather-location {
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.status {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.btn {
+  background: var(--accent-soft);
+  color: var(--text);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn:hover { background: var(--accent); color: #0b0f1a; }
+
+.btn.small {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.timers-grid, .alarms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.timer-card, .alarm-card {
+  background: #10152450;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.timer-label {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.timer-display {
+  font-size: 1.6rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.timer-display.done {
+  color: var(--danger);
+  animation: pulse 1s infinite;
+}
+
+.timer-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.alarm-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+.alarm-time {
+  background: #0b0f1a;
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 6px;
+  font-size: 1rem;
+}
+
+.alarm-status {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}
+
+.alarm-status.active {
+  color: var(--accent);
+}
+
+/* Toggle switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #334;
+  transition: 0.2s;
+  border-radius: 24px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.2s;
+  border-radius: 50%;
+}
+.switch input:checked + .slider { background-color: var(--accent); }
+.switch input:checked + .slider:before { transform: translateX(18px); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.alarm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.alarm-overlay.hidden { display: none; }
+
+.alarm-overlay-content {
+  text-align: center;
+  color: var(--text);
+}
+
+.alarm-ring-icon {
+  font-size: 5rem;
+  animation: pulse 0.6s infinite;
+}
+
+#alarm-overlay-text {
+  font-size: 1.8rem;
+  margin: 16px 0 24px;
+}
+
+@media (max-width: 900px) {
+  .app-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: 60px auto 60px auto 60px;
+    grid-template-areas:
+      "top"
+      "center"
+      "bottom"
+      "left"
+      "right";
+  }
+  .timers-grid, .alarms-grid {
+    grid-template-columns: 1fr;
+  }
+}
