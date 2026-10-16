@@ -13,6 +13,8 @@
 
 * { box-sizing: border-box; }
 
+.hidden { display: none !important; }
+
 html, body {
   margin: 0;
   padding: 0;
@@ -85,6 +87,103 @@ html, body {
   color: var(--text-dim);
   margin-top: 4px;
 }
+
+.clock-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.toggle-btn {
+  background: #1b2235;
+  border: 1px solid var(--panel-border);
+}
+
+.toggle-btn.active {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.analog-clock {
+  display: block;
+  margin: 0 auto;
+}
+
+.tracker-section {
+  width: 100%;
+  max-width: 640px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.tracker-add-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.tracker-input {
+  background: #0b0f1a;
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  min-width: 180px;
+}
+
+.tracker-select {
+  background: #0b0f1a;
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+}
+
+.tracker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tracker-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #10152450;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.tracker-item-name {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.tracker-item-price {
+  font-variant-numeric: tabular-nums;
+  font-size: 1.1rem;
+}
+
+.tracker-item-change.up { color: #4ade80; }
+.tracker-item-change.down { color: var(--danger); }
+
+.tracker-remove {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 1rem;
+  margin-left: 10px;
+}
+.tracker-remove:hover { color: var(--danger); }
 
 section h2 {
   font-size: 1rem;

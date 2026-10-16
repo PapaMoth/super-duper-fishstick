@@ -1,17 +1,107 @@
 // ---------- Clock ----------
 function pad(n) { return n.toString().padStart(2, "0"); }
 
+const CLOCK_MODE_KEY = "clockapp-clock-mode";
+let clockMode = localStorage.getItem(CLOCK_MODE_KEY) || "digital";
+
+const digitalClockEl = document.getElementById("clock");
+const analogClockEl = document.getElementById("analog-clock");
+const analogCtx = analogClockEl.getContext("2d");
+
+function applyClockMode() {
+  const isAnalog = clockMode === "analog";
+  digitalClockEl.classList.toggle("hidden", isAnalog);
+  analogClockEl.classList.toggle("hidden", !isAnalog);
+  document.querySelectorAll("[data-clock-mode]").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.clockMode === clockMode);
+  });
+}
+
+document.querySelectorAll("[data-clock-mode]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    clockMode = btn.dataset.clockMode;
+    try { localStorage.setItem(CLOCK_MODE_KEY, clockMode); } catch (e) { /* storage unavailable */ }
+    applyClockMode();
+  });
+});
+
+function drawAnalogClock(now) {
+  const size = analogClockEl.width;
+  const radius = size / 2;
+  const ctx = analogCtx;
+  ctx.clearRect(0, 0, size, size);
+  ctx.save();
+  ctx.translate(radius, radius);
+
+  // Face
+  ctx.beginPath();
+  ctx.arc(0, 0, radius - 6, 0, Math.PI * 2);
+  ctx.fillStyle = "#10152470";
+  ctx.fill();
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "#4fd1c5";
+  ctx.stroke();
+
+  // Hour ticks
+  for (let i = 0; i < 12; i++) {
+    const angle = (i * Math.PI) / 6;
+    ctx.beginPath();
+    const outer = radius - 14;
+    const inner = radius - 24;
+    ctx.moveTo(Math.sin(angle) * outer, -Math.cos(angle) * outer);
+    ctx.lineTo(Math.sin(angle) * inner, -Math.cos(angle) * inner);
+    ctx.strokeStyle = "#8d98b3";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  const hours = now.getHours() % 12;
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+
+  const hourAngle = ((hours + minutes / 60) * Math.PI) / 6;
+  const minuteAngle = ((minutes + seconds / 60) * Math.PI) / 30;
+  const secondAngle = (seconds * Math.PI) / 30;
+
+  drawHand(ctx, hourAngle, radius * 0.5, 6, "#e8ecf5");
+  drawHand(ctx, minuteAngle, radius * 0.72, 4, "#e8ecf5");
+  drawHand(ctx, secondAngle, radius * 0.8, 2, "#ff6b6b");
+
+  // Center pin
+  ctx.beginPath();
+  ctx.arc(0, 0, 6, 0, Math.PI * 2);
+  ctx.fillStyle = "#4fd1c5";
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawHand(ctx, angle, length, width, color) {
+  ctx.save();
+  ctx.rotate(angle);
+  ctx.beginPath();
+  ctx.moveTo(0, 8);
+  ctx.lineTo(0, -length);
+  ctx.lineWidth = width;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = color;
+  ctx.stroke();
+  ctx.restore();
+}
+
 function updateClock() {
   const now = new Date();
   const h = pad(now.getHours());
   const m = pad(now.getMinutes());
   const s = pad(now.getSeconds());
-  document.getElementById("clock").textContent = `${h}:${m}:${s}`;
+  digitalClockEl.textContent = `${h}:${m}:${s}`;
   document.getElementById("date").textContent = now.toLocaleDateString(undefined, {
     weekday: "long", year: "numeric", month: "long", day: "numeric"
   });
+  drawAnalogClock(now);
 }
 setInterval(updateClock, 1000);
+applyClockMode();
 updateClock();
 
 // ---------- Weather (Open-Meteo, no API key required) ----------
@@ -243,6 +333,127 @@ loadAlarms();
 // ---------- Screensaver-friendly motion ----------
 // Periodically nudge the center panel so the same pixels aren't static for
 // hours on an OLED/plasma display, like a classic clock screensaver.
+// ---------- Stock & Crypto Tracker ----------
+const TRACKER_STORAGE_KEY = "clockapp-tracker";
+const trackerSymbolInput = document.getElementById("tracker-symbol");
+const trackerTypeSelect = document.getElementById("tracker-type");
+const trackerAddBtn = document.getElementById("tracker-add-btn");
+const trackerStatus = document.getElementById("tracker-status");
+const trackerList = document.getElementById("tracker-list");
+
+function loadTrackedAssets() {
+  try {
+    return JSON.parse(localStorage.getItem(TRACKER_STORAGE_KEY) || "[]");
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveTrackedAssets(assets) {
+  try { localStorage.setItem(TRACKER_STORAGE_KEY, JSON.stringify(assets)); } catch (e) { /* storage unavailable */ }
+}
+
+let trackedAssets = loadTrackedAssets();
+
+trackerAddBtn.addEventListener("click", () => {
+  const rawSymbol = trackerSymbolInput.value.trim();
+  const type = trackerTypeSelect.value;
+  if (!rawSymbol) {
+    trackerStatus.textContent = "Enter a symbol first.";
+    return;
+  }
+  const id = type === "crypto" ? rawSymbol.toLowerCase() : rawSymbol.toUpperCase();
+  if (trackedAssets.some((a) => a.id === id && a.type === type)) {
+    trackerStatus.textContent = "Already tracking that one.";
+    return;
+  }
+  trackedAssets.push({ id, type });
+  saveTrackedAssets(trackedAssets);
+  trackerSymbolInput.value = "";
+  trackerStatus.textContent = "";
+  renderTrackerList();
+});
+
+trackerSymbolInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") trackerAddBtn.click();
+});
+
+function removeTrackedAsset(id, type) {
+  trackedAssets = trackedAssets.filter((a) => !(a.id === id && a.type === type));
+  saveTrackedAssets(trackedAssets);
+  renderTrackerList();
+}
+
+function renderTrackerList() {
+  if (trackedAssets.length === 0) {
+    trackerList.innerHTML = `<div class="status">No assets tracked yet. Add a crypto id (e.g. "bitcoin", "ethereum") or a stock ticker (e.g. "AAPL").</div>`;
+    return;
+  }
+  trackerList.innerHTML = trackedAssets.map((a) => `
+    <div class="tracker-item" data-id="${a.id}" data-type="${a.type}">
+      <span class="tracker-item-name">${a.id} <small style="color:var(--text-dim)">(${a.type})</small></span>
+      <span class="tracker-item-price" data-price>Loading…</span>
+      <button class="tracker-remove" data-remove>✕</button>
+    </div>
+  `).join("");
+
+  trackerList.querySelectorAll("[data-remove]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const item = e.target.closest(".tracker-item");
+      removeTrackedAsset(item.dataset.id, item.dataset.type);
+    });
+  });
+
+  refreshTrackerPrices();
+}
+
+async function fetchCryptoPrice(id) {
+  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(id)}&vs_currencies=usd&include_24hr_change=true`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Request failed");
+  const data = await res.json();
+  const entry = data[id];
+  if (!entry) throw new Error("Unknown crypto id");
+  return { price: entry.usd, changePct: entry.usd_24h_change };
+}
+
+async function fetchStockPrice(symbol) {
+  // Stooq offers free, key-free delayed quotes via CSV.
+  const url = `https://stooq.com/q/l/?s=${encodeURIComponent(symbol.toLowerCase())}.us&f=sd2t2ohlcv&h&e=csv`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Request failed");
+  const text = await res.text();
+  const rows = text.trim().split("\n");
+  if (rows.length < 2) throw new Error("No data");
+  const cols = rows[1].split(",");
+  // Columns: Symbol,Date,Time,Open,High,Low,Close,Volume
+  const close = parseFloat(cols[6]);
+  const open = parseFloat(cols[3]);
+  if (isNaN(close)) throw new Error("Unknown ticker");
+  const changePct = open ? ((close - open) / open) * 100 : 0;
+  return { price: close, changePct };
+}
+
+async function refreshTrackerPrices() {
+  for (const asset of trackedAssets) {
+    const el = trackerList.querySelector(`.tracker-item[data-id="${CSS.escape(asset.id)}"][data-type="${asset.type}"] [data-price]`);
+    if (!el) continue;
+    try {
+      const { price, changePct } = asset.type === "crypto"
+        ? await fetchCryptoPrice(asset.id)
+        : await fetchStockPrice(asset.id);
+      const dir = changePct >= 0 ? "up" : "down";
+      const sign = changePct >= 0 ? "+" : "";
+      el.innerHTML = `$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span class="tracker-item-change ${dir}">${sign}${changePct.toFixed(2)}%</span>`;
+    } catch (err) {
+      el.textContent = "Unavailable";
+    }
+  }
+}
+
+renderTrackerList();
+setInterval(refreshTrackerPrices, 60000);
+
 (function screensaverDrift() {
   const main = document.querySelector("main.center");
   let x = 0, y = 0, dx = 1, dy = 1;

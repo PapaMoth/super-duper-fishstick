@@ -18,8 +18,27 @@
   <!-- Center: clock, weather, timers, alarms -->
   <main class="center">
     <section class="clock-section">
+      <div class="clock-toggle">
+        <button class="btn small toggle-btn active" data-clock-mode="digital">Digital</button>
+        <button class="btn small toggle-btn" data-clock-mode="analog">Analog</button>
+      </div>
       <div id="clock" class="clock">00:00:00</div>
+      <canvas id="analog-clock" class="analog-clock hidden" width="280" height="280"></canvas>
       <div id="date" class="date">Loading date…</div>
+    </section>
+
+    <section class="tracker-section">
+      <h2>Stock &amp; Crypto Tracker</h2>
+      <div class="tracker-add-row">
+        <input type="text" id="tracker-symbol" class="tracker-input" placeholder="Symbol (e.g. AAPL or bitcoin)" />
+        <select id="tracker-type" class="tracker-select">
+          <option value="crypto">Crypto</option>
+          <option value="stock">Stock</option>
+        </select>
+        <button id="tracker-add-btn" class="btn small">Add</button>
+      </div>
+      <div id="tracker-status" class="status"></div>
+      <div id="tracker-list" class="tracker-list"></div>
     </section>
 
     <section class="weather-section">
