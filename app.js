@@ -11,22 +11,13 @@ const digitalClockEl = document.getElementById("clock");
 const analogClockEl = document.getElementById("analog-clock");
 const analogCtx = analogClockEl.getContext("2d");
 
+// The digital/analog choice itself is set on the Settings page; this page
+// just reads the stored preference and renders accordingly.
 function applyClockMode() {
   const isAnalog = clockMode === "analog";
   digitalClockEl.classList.toggle("hidden", isAnalog);
   analogClockEl.classList.toggle("hidden", !isAnalog);
-  document.querySelectorAll("[data-clock-mode]").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.clockMode === clockMode);
-  });
 }
-
-document.querySelectorAll("[data-clock-mode]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    clockMode = btn.dataset.clockMode;
-    try { localStorage.setItem(CLOCK_MODE_KEY, clockMode); } catch (e) { /* storage unavailable */ }
-    applyClockMode();
-  });
-});
 
 function drawAnalogClock(now) {
   const size = analogClockEl.width;
@@ -120,7 +111,7 @@ async function fetchWithTimeout(url, timeoutMs = 10000) {
   }
 }
 
-// ---------- Weather (Open-Meteo, no API key required) ----------
+// ---------- Weather & Traffic (Open-Meteo, no API key required) ----------
 const weatherBtn = document.getElementById("weather-btn");
 const weatherResult = document.getElementById("weather-result");
 const weatherStatus = document.getElementById("weather-status");
@@ -204,6 +195,7 @@ function renderWeather(data, lat, lon) {
 // Traffic: no key-free live traffic API exists, so we link out to a map
 // centered on the user's coordinates rather than fake live data.
 function renderTrafficPlaceholder(lat, lon) {
+  trafficStatus.textContent = "";
   trafficResult.innerHTML = `
     <div>Live traffic data requires a mapping API key (e.g. Google Maps, TomTom, HERE).</div>
     <a class="btn" style="text-decoration:none;display:inline-block;margin-top:8px"
@@ -213,274 +205,6 @@ function renderTrafficPlaceholder(lat, lon) {
   `;
 }
 
-// ---------- Timers ----------
-// Countdown is derived from a wall-clock end timestamp rather than counted
-// down one setInterval tick at a time, so a throttled/backgrounded tab
-// (where callbacks fire late or are coalesced) doesn't make the timer run
-// slow — each tick just recomputes remaining time from Date.now().
-document.querySelectorAll(".timer-card").forEach((card) => {
-  const totalSeconds = parseInt(card.dataset.minutes, 10) * 60;
-  let remaining = totalSeconds;
-  let endTime = null; // Date.now()-based deadline while running
-  let intervalId = null;
-  const display = card.querySelector("[data-display]");
-
-  function render() {
-    const m = Math.floor(remaining / 60);
-    const s = remaining % 60;
-    display.textContent = `${pad(m)}:${pad(s)}`;
-    display.classList.toggle("done", remaining <= 0);
-  }
-
-  function tick() {
-    remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000));
-    if (remaining <= 0) {
-      render();
-      clearInterval(intervalId);
-      intervalId = null;
-      endTime = null;
-      playBeep();
-      return;
-    }
-    render();
-  }
-
-  card.querySelector('[data-action="start"]').addEventListener("click", () => {
-    if (intervalId || remaining <= 0) return;
-    endTime = Date.now() + remaining * 1000;
-    intervalId = setInterval(tick, 1000);
-  });
-  card.querySelector('[data-action="pause"]').addEventListener("click", () => {
-    clearInterval(intervalId);
-    intervalId = null;
-    endTime = null;
-  });
-  card.querySelector('[data-action="reset"]').addEventListener("click", () => {
-    clearInterval(intervalId);
-    intervalId = null;
-    endTime = null;
-    remaining = totalSeconds;
-    render();
-  });
-
-  render();
-});
-
-// ---------- Alarms ----------
-const alarmCards = document.querySelectorAll(".alarm-card");
-const alarmOverlay = document.getElementById("alarm-overlay");
-const alarmOverlayText = document.getElementById("alarm-overlay-text");
-const alarmDismissBtn = document.getElementById("alarm-dismiss");
-
-const STORAGE_KEY = "clockapp-alarms";
-const ALARM_SOUNDS_STORAGE_KEY = "clockapp-alarm-sounds";
-let ringingInterval = null;
-let ringingAlarmIndex = null;
-const alarmSounds = [null, null, null]; // data URLs, one per alarm card
-
-function loadAlarms() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    alarmCards.forEach((card, i) => {
-      const a = saved[i];
-      if (!a) return;
-      card.querySelector(".alarm-time").value = a.time || "";
-      card.querySelector(".alarm-enabled").checked = !!a.enabled;
-      updateAlarmStatus(card);
-    });
-  } catch (e) { /* ignore corrupt storage */ }
-
-  try {
-    const savedSounds = JSON.parse(localStorage.getItem(ALARM_SOUNDS_STORAGE_KEY) || "[]");
-    alarmCards.forEach((card, i) => {
-      if (savedSounds[i] && savedSounds[i].dataUrl) {
-        alarmSounds[i] = savedSounds[i];
-        updateAlarmSoundUI(card, savedSounds[i].name);
-      }
-    });
-  } catch (e) { /* ignore corrupt storage */ }
-}
-
-function saveAlarmSounds() {
-  try { localStorage.setItem(ALARM_SOUNDS_STORAGE_KEY, JSON.stringify(alarmSounds)); } catch (e) {
-    // Custom sounds are data URLs and can exceed localStorage's ~5MB quota;
-    // the sound still plays for the current session even if it can't persist.
-  }
-}
-
-function updateAlarmSoundUI(card, fileName) {
-  card.querySelector("[data-sound-name]").textContent = fileName;
-  card.querySelector(".alarm-sound-reset").classList.remove("hidden");
-}
-
-function saveAlarms() {
-  const data = Array.from(alarmCards).map((card) => ({
-    time: card.querySelector(".alarm-time").value,
-    enabled: card.querySelector(".alarm-enabled").checked
-  }));
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch (e) {
-    // The in-memory alarm still works for this session; only persistence
-    // across reloads is lost, so tell the user rather than fail silently.
-    alarmCards.forEach((card) => {
-      card.querySelector("[data-status]").textContent += " (not saved — storage unavailable)";
-    });
-  }
-}
-
-function updateAlarmStatus(card) {
-  const enabled = card.querySelector(".alarm-enabled").checked;
-  const time = card.querySelector(".alarm-time").value;
-  const statusEl = card.querySelector("[data-status]");
-  if (enabled && time) {
-    statusEl.textContent = `Set for ${time}`;
-    statusEl.classList.add("active");
-  } else {
-    statusEl.textContent = "Off";
-    statusEl.classList.remove("active");
-  }
-}
-
-alarmCards.forEach((card, i) => {
-  card.querySelector(".alarm-time").addEventListener("change", () => {
-    updateAlarmStatus(card);
-    delete card.dataset.firedToday;
-    saveAlarms();
-  });
-  card.querySelector(".alarm-enabled").addEventListener("change", () => {
-    updateAlarmStatus(card);
-    delete card.dataset.firedToday;
-    saveAlarms();
-  });
-
-  const soundInput = card.querySelector(".alarm-sound-input");
-  card.querySelector('[data-action="upload-sound"]').addEventListener("click", () => soundInput.click());
-
-  soundInput.addEventListener("change", () => {
-    const file = soundInput.files && soundInput.files[0];
-    if (!file) return;
-    if (!file.type.startsWith("audio/")) {
-      alert("Please choose an audio file.");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      alarmSounds[i] = { dataUrl: reader.result, name: file.name };
-      updateAlarmSoundUI(card, file.name);
-      saveAlarmSounds();
-    };
-    reader.readAsDataURL(file);
-    soundInput.value = "";
-  });
-
-  card.querySelector('[data-action="reset-sound"]').addEventListener("click", () => {
-    alarmSounds[i] = null;
-    card.querySelector("[data-sound-name]").textContent = "Default beep";
-    card.querySelector(".alarm-sound-reset").classList.add("hidden");
-    saveAlarmSounds();
-  });
-});
-
-// Checks against elapsed wall-clock minutes rather than requiring the exact
-// current minute to be observed, so a throttled/backgrounded tab that misses
-// a tick (e.g. two polls land in the same minute, or a minute is skipped
-// entirely) still fires the alarm instead of silently missing it.
-let lastCheckedMinutes = Math.floor(Date.now() / 60000);
-
-function checkAlarms() {
-  const now = new Date();
-  const todayKey = now.toDateString();
-  const nowMinutes = Math.floor(now.getTime() / 60000);
-  if (nowMinutes === lastCheckedMinutes) return;
-  const sinceLastCheck = Math.min(nowMinutes - lastCheckedMinutes, 1440); // cap at a day
-  lastCheckedMinutes = nowMinutes;
-
-  alarmCards.forEach((card, i) => {
-    const enabled = card.querySelector(".alarm-enabled").checked;
-    const time = card.querySelector(".alarm-time").value;
-    if (!enabled || !time) return;
-    const [alarmHour, alarmMinute] = time.split(":").map(Number);
-    const alarmDate = new Date(now);
-    alarmDate.setHours(alarmHour, alarmMinute, 0, 0);
-    const alarmMinutes = Math.floor(alarmDate.getTime() / 60000);
-    const minutesSinceAlarm = nowMinutes - alarmMinutes;
-    const alarmWasCrossed = minutesSinceAlarm >= 0 && minutesSinceAlarm < sinceLastCheck;
-    if (alarmWasCrossed && card.dataset.firedToday !== todayKey) {
-      card.dataset.firedToday = todayKey;
-      triggerAlarm(i, time);
-    }
-  });
-}
-setInterval(checkAlarms, 1000);
-
-function triggerAlarm(cardIndex, time) {
-  ringingAlarmIndex = cardIndex;
-  alarmOverlayText.textContent = `Alarm ${cardIndex + 1} — ${time}`;
-  alarmOverlay.classList.remove("hidden");
-  playAlarmSound(cardIndex);
-  if (ringingInterval) clearInterval(ringingInterval);
-  ringingInterval = setInterval(() => playAlarmSound(cardIndex), 1200);
-}
-
-alarmDismissBtn.addEventListener("click", () => {
-  alarmOverlay.classList.add("hidden");
-  if (ringingInterval) {
-    clearInterval(ringingInterval);
-    ringingInterval = null;
-  }
-  ringingAlarmIndex = null;
-});
-
-// The default alert sound is generated with the Web Audio API so it's
-// guaranteed to be audible (a static embedded WAV with an empty data chunk
-// was previously used and produced no sound at all).
-let sharedAudioCtx = null;
-function getAudioContext() {
-  if (!sharedAudioCtx) {
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) return null;
-    sharedAudioCtx = new Ctx();
-  }
-  if (sharedAudioCtx.state === "suspended") {
-    sharedAudioCtx.resume().catch(() => { /* ignore */ });
-  }
-  return sharedAudioCtx;
-}
-
-function playBeep() {
-  const ctx = getAudioContext();
-  if (!ctx) return;
-  const duration = 0.35;
-  const now = ctx.currentTime;
-  const oscillator = ctx.createOscillator();
-  const gain = ctx.createGain();
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(880, now);
-  gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(0.3, now + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-  oscillator.connect(gain);
-  gain.connect(ctx.destination);
-  oscillator.start(now);
-  oscillator.stop(now + duration);
-}
-
-function playAlarmSound(cardIndex) {
-  const custom = alarmSounds[cardIndex];
-  if (custom && custom.dataUrl) {
-    const audio = new Audio(custom.dataUrl);
-    audio.play().catch(() => { /* autoplay may be blocked until user interacts */ });
-  } else {
-    playBeep();
-  }
-}
-
-loadAlarms();
-
-// ---------- Screensaver-friendly motion ----------
-// Periodically nudge the center panel so the same pixels aren't static for
-// hours on an OLED/plasma display, like a classic clock screensaver.
 // ---------- Stock & Crypto Tracker ----------
 const TRACKER_STORAGE_KEY = "clockapp-tracker";
 const trackerSymbolInput = document.getElementById("tracker-symbol");
@@ -489,6 +213,8 @@ const trackerAddBtn = document.getElementById("tracker-add-btn");
 const trackerStatus = document.getElementById("tracker-status");
 const trackerList = document.getElementById("tracker-list");
 const trackerCount = document.getElementById("tracker-count");
+
+const MAX_TRACKED_ASSETS = 6;
 
 function loadTrackedAssets() {
   try {
@@ -511,7 +237,6 @@ function saveTrackedAssets(assets) {
   }
 }
 
-const MAX_TRACKED_ASSETS = 6;
 let trackedAssets = loadTrackedAssets();
 
 trackerAddBtn.addEventListener("click", () => {
@@ -694,10 +419,11 @@ setInterval(() => refreshTrackerPrices(true), 60000);
 })();
 
 // ---------- Screensaver Mode ----------
-// Hides the ad slots and the tracker/timer/alarm panels so only the clock
-// and weather stay on screen, and hides the cursor after a few seconds of
-// inactivity. Any key press, click, or mouse move exits.
-const screensaverBtn = document.getElementById("screensaver-btn");
+// Hides the ad slots and the tracker panel so only the clock and weather
+// stay on screen, and hides the cursor after a few seconds of inactivity.
+// Any key press, click, or mouse move exits. Entered automatically after an
+// idle period, or on demand via the "Launch Screensaver" button on the
+// Settings page (which links here with ?screensaver=1).
 let screensaverActive = false;
 let cursorIdleTimeout = null;
 
@@ -740,17 +466,11 @@ function resetCursorIdleTimer() {
 }
 
 function onScreensaverActivity() {
-  // The button click that enters screensaver mode calls stopPropagation
-  // below, so it never reaches these document-level listeners (which are
-  // only attached once already inside screensaver mode) — any event here is
-  // a genuine exit signal, including mouse movement.
+  // These document-level listeners are only attached once already inside
+  // screensaver mode, so any event here is a genuine exit signal, including
+  // mouse movement.
   exitScreensaverMode();
 }
-
-screensaverBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  enterScreensaverMode(true);
-});
 
 document.addEventListener("fullscreenchange", () => {
   if (!document.fullscreenElement && screensaverActive) {
@@ -776,60 +496,20 @@ function resetAutoScreensaverTimer() {
 });
 resetAutoScreensaverTimer();
 
-// ---------- Background Image Upload ----------
-const BG_IMAGE_STORAGE_KEY = "clockapp-bg-image";
-const bgUploadBtn = document.getElementById("bg-upload-btn");
-const bgUploadInput = document.getElementById("bg-upload-input");
-const bgClearBtn = document.getElementById("bg-clear-btn");
-
-function applyBackgroundImage(dataUrl) {
-  if (dataUrl) {
-    document.body.style.backgroundImage = `url("${dataUrl}")`;
-    document.body.classList.add("has-bg-image");
-    bgClearBtn.classList.remove("hidden");
-  } else {
-    document.body.style.backgroundImage = "";
-    document.body.classList.remove("has-bg-image");
-    bgClearBtn.classList.add("hidden");
+// The Settings page's "Launch Screensaver" button links here with
+// ?screensaver=1 since the screensaver's content (clock, weather, ads) only
+// exists on this page. Fullscreen isn't requested in this case — browsers
+// only grant it in direct response to a user gesture on the SAME page, and
+// the gesture that led here was a click on the previous page.
+(function handleScreensaverLaunchParam() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("screensaver") === "1") {
+    params.delete("screensaver");
+    const cleanUrl = window.location.pathname + (params.toString() ? `?${params}` : "") + window.location.hash;
+    window.history.replaceState({}, "", cleanUrl);
+    enterScreensaverMode(false);
   }
-}
-
-bgUploadBtn.addEventListener("click", () => bgUploadInput.click());
-
-let bgUploadRequestId = 0;
-
-bgUploadInput.addEventListener("change", () => {
-  const file = bgUploadInput.files && bgUploadInput.files[0];
-  if (!file) return;
-  if (!file.type.startsWith("image/")) {
-    alert("Please choose an image file.");
-    return;
-  }
-  const requestId = ++bgUploadRequestId;
-  const reader = new FileReader();
-  reader.onload = () => {
-    if (requestId !== bgUploadRequestId) return; // a newer upload has started
-    const dataUrl = reader.result;
-    applyBackgroundImage(dataUrl);
-    try { localStorage.setItem(BG_IMAGE_STORAGE_KEY, dataUrl); } catch (e) {
-      // localStorage has a size limit (~5MB); a large photo may not persist
-      // across reloads, but it still applies for the current session.
-    }
-  };
-  reader.readAsDataURL(file);
-  bgUploadInput.value = "";
-});
-
-bgClearBtn.addEventListener("click", () => {
-  bgUploadRequestId++; // invalidate any upload whose FileReader hasn't resolved yet
-  applyBackgroundImage(null);
-  try { localStorage.removeItem(BG_IMAGE_STORAGE_KEY); } catch (e) { /* storage unavailable */ }
-});
-
-(function restoreBackgroundImage() {
-  try {
-    const saved = localStorage.getItem(BG_IMAGE_STORAGE_KEY);
-    if (saved) applyBackgroundImage(saved);
-  } catch (e) { /* storage unavailable */ }
 })();
 
+// ---------- Background Image / Slideshow (see background.js) ----------
+applyBackgroundFromStorage();

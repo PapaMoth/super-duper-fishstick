@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — Clock Display, Screensaver &amp; Background</title>
+<meta name="description" content="Choose a digital or analog clock display, launch the fullscreen screensaver, and set a single background image or a multi-image slideshow shared across the whole site.">
+<meta name="keywords" content="clock settings, digital analog clock toggle, screensaver, background slideshow">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://github.com/PapaMoth/super-duper-fishstick">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Settings — Clock Display, Screensaver &amp; Background">
+<meta property="og:description" content="Choose a digital or analog clock display, launch the fullscreen screensaver, and set a single background image or a multi-image slideshow.">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Settings — Clock Display, Screensaver &amp; Background">
+<meta name="twitter:description" content="Choose a digital or analog clock display, launch the fullscreen screensaver, and set a single background image or a multi-image slideshow.">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-grid">
+
+  <!-- Top ad banner -->
+  <div class="ad ad-top">Ad Space — 728x90 Leaderboard</div>
+
+  <!-- Left ad rail -->
+  <div class="ad ad-left">Ad<br>160x600</div>
+
+  <!-- Center: nav, settings -->
+  <main class="center">
+    <nav class="site-nav">
+      <a href="index.html" class="nav-link">Dashboard</a>
+      <a href="settings.html" class="nav-link active">Settings</a>
+      <a href="calendar.html" class="nav-link">Calendar, Alarms &amp; Timers</a>
+    </nav>
+
+    <h1 class="sr-only">Settings: Clock Display, Screensaver, and Background</h1>
+
+    <section class="settings-section">
+      <h2>Clock Display</h2>
+      <div class="clock-toggle">
+        <button class="btn small toggle-btn active" data-clock-mode="digital">Digital</button>
+        <button class="btn small toggle-btn" data-clock-mode="analog">Analog</button>
+      </div>
+      <div class="status">Applies on the Dashboard page.</div>
+    </section>
+
+    <section class="settings-section">
+      <h2>Screensaver</h2>
+      <a id="screensaver-launch" href="index.html?screensaver=1" class="btn">Launch Screensaver</a>
+      <div class="status">Opens the Dashboard in fullscreen screensaver mode. The Dashboard also enters it automatically after 10 minutes idle.</div>
+    </section>
+
+    <section class="settings-section">
+      <h2>Background</h2>
+      <div class="clock-toggle">
+        <button id="bg-upload-btn" class="btn small">Background Image(s)</button>
+        <button id="bg-clear-btn" class="btn small hidden">Clear Background</button>
+        <input type="file" id="bg-upload-input" accept="image/*" multiple class="hidden" />
+      </div>
+      <div id="bg-status" class="status"></div>
+      <div class="status">Pick one image for a static background, or several at once for a slideshow. Shows on every page.</div>
+    </section>
+  </main>
+
+  <!-- Right ad rail -->
+  <div class="ad ad-right">Ad<br>160x600</div>
+
+  <!-- Bottom ad banner -->
+  <div class="ad ad-bottom">Ad Space — 728x90 Leaderboard</div>
+
+</div>
+
+<script src="background.js"></script>
+<script src="settings.js"></script>
+</body>
+</html>

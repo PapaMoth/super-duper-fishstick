@@ -17,9 +17,7 @@
 
 body.screensaver-mode .ad,
 body.screensaver-mode .tracker-section,
-body.screensaver-mode .traffic-section,
-body.screensaver-mode .timers-section,
-body.screensaver-mode .alarms-section {
+body.screensaver-mode .site-nav {
   display: none !important;
 }
 
@@ -174,6 +172,32 @@ body.has-bg-image .center {
   margin: 0 auto;
 }
 
+.site-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.nav-link {
+  color: var(--text-dim);
+  text-decoration: none;
+  background: #1b2235;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+}
+
+.nav-link:hover {
+  color: var(--text);
+}
+
+.nav-link.active {
+  background: var(--accent-soft);
+  color: var(--text);
+  border-color: var(--accent-soft);
+}
+
 .tracker-section {
   width: 100%;
   max-width: 640px;
@@ -272,7 +296,7 @@ section h2 {
   text-align: center;
 }
 
-.weather-section, .traffic-section, .timers-section, .alarms-section {
+.weather-section, .timers-section, .alarms-section, .calendar-section, .settings-section {
   width: 100%;
   max-width: 640px;
   background: var(--panel);
@@ -281,12 +305,30 @@ section h2 {
   padding: 16px 20px;
 }
 
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.settings-section .clock-toggle {
+  margin-bottom: 0;
+}
+
 .weather-body, .traffic-body {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   text-align: center;
+}
+
+.traffic-body {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--panel-border);
 }
 
 .weather-main {
@@ -328,6 +370,11 @@ section h2 {
 }
 
 .btn:hover { background: var(--accent); color: #0b0f1a; }
+
+a.btn {
+  text-decoration: none;
+  display: inline-block;
+}
 
 .btn.small {
   padding: 6px 12px;
@@ -398,14 +445,14 @@ section h2 {
   color: var(--accent);
 }
 
-.alarm-sound-row {
+.sound-row {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
-.alarm-sound-name {
+.sound-name {
   font-size: 0.75rem;
   color: var(--text-dim);
   text-align: center;
@@ -413,6 +460,91 @@ section h2 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.alarm-note {
+  background: #0b0f1a;
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 0.8rem;
+  width: 100%;
+  text-align: center;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.calendar-weekday {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  padding-bottom: 4px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #10152450;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.calendar-day.empty {
+  background: transparent;
+  border: none;
+}
+
+.calendar-day.today {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.todays-alarms-heading {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.todays-alarms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.todays-alarm-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  background: #10152450;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.todays-alarm-time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.todays-alarm-note {
+  color: var(--text-dim);
+  font-size: 0.9rem;
 }
 
 /* Toggle switch */
@@ -473,7 +605,15 @@ section h2 {
 
 #alarm-overlay-text {
   font-size: 1.8rem;
-  margin: 16px 0 24px;
+  margin: 16px 0 8px;
+}
+
+.alarm-overlay-note {
+  font-size: 1.1rem;
+  color: var(--text-dim);
+  font-style: italic;
+  margin-bottom: 24px;
+  max-width: 400px;
 }
 
 @media (max-width: 900px) {
