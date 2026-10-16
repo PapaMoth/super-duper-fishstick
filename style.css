@@ -396,6 +396,23 @@ section h2 {
   color: var(--accent);
 }
 
+.alarm-sound-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.alarm-sound-name {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Toggle switch */
 .switch {
   position: relative;

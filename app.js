@@ -239,7 +239,10 @@ const alarmOverlayText = document.getElementById("alarm-overlay-text");
 const alarmDismissBtn = document.getElementById("alarm-dismiss");
 
 const STORAGE_KEY = "clockapp-alarms";
+const ALARM_SOUNDS_STORAGE_KEY = "clockapp-alarm-sounds";
 let ringingInterval = null;
+let ringingAlarmIndex = null;
+const alarmSounds = [null, null, null]; // data URLs, one per alarm card
 
 function loadAlarms() {
   try {
@@ -252,6 +255,28 @@ function loadAlarms() {
       updateAlarmStatus(card);
     });
   } catch (e) { /* ignore corrupt storage */ }
+
+  try {
+    const savedSounds = JSON.parse(localStorage.getItem(ALARM_SOUNDS_STORAGE_KEY) || "[]");
+    alarmCards.forEach((card, i) => {
+      if (savedSounds[i] && savedSounds[i].dataUrl) {
+        alarmSounds[i] = savedSounds[i];
+        updateAlarmSoundUI(card, savedSounds[i].name);
+      }
+    });
+  } catch (e) { /* ignore corrupt storage */ }
+}
+
+function saveAlarmSounds() {
+  try { localStorage.setItem(ALARM_SOUNDS_STORAGE_KEY, JSON.stringify(alarmSounds)); } catch (e) {
+    // Custom sounds are data URLs and can exceed localStorage's ~5MB quota;
+    // the sound still plays for the current session even if it can't persist.
+  }
+}
+
+function updateAlarmSoundUI(card, fileName) {
+  card.querySelector("[data-sound-name]").textContent = fileName;
+  card.querySelector(".alarm-sound-reset").classList.remove("hidden");
 }
 
 function saveAlarms() {
@@ -275,7 +300,7 @@ function updateAlarmStatus(card) {
   }
 }
 
-alarmCards.forEach((card) => {
+alarmCards.forEach((card, i) => {
   card.querySelector(".alarm-time").addEventListener("change", () => {
     updateAlarmStatus(card);
     delete card.dataset.firedToday;
@@ -285,6 +310,33 @@ alarmCards.forEach((card) => {
     updateAlarmStatus(card);
     delete card.dataset.firedToday;
     saveAlarms();
+  });
+
+  const soundInput = card.querySelector(".alarm-sound-input");
+  card.querySelector('[data-action="upload-sound"]').addEventListener("click", () => soundInput.click());
+
+  soundInput.addEventListener("change", () => {
+    const file = soundInput.files && soundInput.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("audio/")) {
+      alert("Please choose an audio file.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      alarmSounds[i] = { dataUrl: reader.result, name: file.name };
+      updateAlarmSoundUI(card, file.name);
+      saveAlarmSounds();
+    };
+    reader.readAsDataURL(file);
+    soundInput.value = "";
+  });
+
+  card.querySelector('[data-action="reset-sound"]').addEventListener("click", () => {
+    alarmSounds[i] = null;
+    card.querySelector("[data-sound-name]").textContent = "Default beep";
+    card.querySelector(".alarm-sound-reset").classList.add("hidden");
+    saveAlarmSounds();
   });
 });
 
@@ -301,17 +353,18 @@ function checkAlarms() {
     if (!enabled || !time) return;
     if (time === current && card.dataset.firedToday !== todayKey) {
       card.dataset.firedToday = todayKey;
-      triggerAlarm(i + 1, time);
+      triggerAlarm(i, time);
     }
   });
 }
 setInterval(checkAlarms, 1000);
 
-function triggerAlarm(index, time) {
-  alarmOverlayText.textContent = `Alarm ${index} — ${time}`;
+function triggerAlarm(cardIndex, time) {
+  ringingAlarmIndex = cardIndex;
+  alarmOverlayText.textContent = `Alarm ${cardIndex + 1} — ${time}`;
   alarmOverlay.classList.remove("hidden");
-  playBeep();
-  ringingInterval = setInterval(playBeep, 1200);
+  playAlarmSound(cardIndex);
+  ringingInterval = setInterval(() => playAlarmSound(cardIndex), 1200);
 }
 
 alarmDismissBtn.addEventListener("click", () => {
@@ -320,12 +373,23 @@ alarmDismissBtn.addEventListener("click", () => {
     clearInterval(ringingInterval);
     ringingInterval = null;
   }
+  ringingAlarmIndex = null;
 });
 
 function playBeep() {
   const audio = document.getElementById("beep-sound");
   audio.currentTime = 0;
   audio.play().catch(() => { /* autoplay may be blocked until user interacts */ });
+}
+
+function playAlarmSound(cardIndex) {
+  const custom = alarmSounds[cardIndex];
+  if (custom && custom.dataUrl) {
+    const audio = new Audio(custom.dataUrl);
+    audio.play().catch(() => { /* autoplay may be blocked until user interacts */ });
+  } else {
+    playBeep();
+  }
 }
 
 loadAlarms();
