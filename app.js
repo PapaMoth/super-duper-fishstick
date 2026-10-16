@@ -340,6 +340,7 @@ const trackerTypeSelect = document.getElementById("tracker-type");
 const trackerAddBtn = document.getElementById("tracker-add-btn");
 const trackerStatus = document.getElementById("tracker-status");
 const trackerList = document.getElementById("tracker-list");
+const trackerCount = document.getElementById("tracker-count");
 
 function loadTrackedAssets() {
   try {
@@ -355,9 +356,15 @@ function saveTrackedAssets(assets) {
 
 let trackedAssets = loadTrackedAssets();
 
+const MAX_TRACKED_ASSETS = 6;
+
 trackerAddBtn.addEventListener("click", () => {
   const rawSymbol = trackerSymbolInput.value.trim();
   const type = trackerTypeSelect.value;
+  if (trackedAssets.length >= MAX_TRACKED_ASSETS) {
+    trackerStatus.textContent = `You can track up to ${MAX_TRACKED_ASSETS} tickers. Remove one to add another.`;
+    return;
+  }
   if (!rawSymbol) {
     trackerStatus.textContent = "Enter a symbol first.";
     return;
@@ -385,6 +392,11 @@ function removeTrackedAsset(id, type) {
 }
 
 function renderTrackerList() {
+  const atLimit = trackedAssets.length >= MAX_TRACKED_ASSETS;
+  trackerAddBtn.disabled = atLimit;
+  trackerSymbolInput.disabled = atLimit;
+  trackerCount.textContent = `${trackedAssets.length} / ${MAX_TRACKED_ASSETS} tickers`;
+
   if (trackedAssets.length === 0) {
     trackerList.innerHTML = `<div class="status">No assets tracked yet. Add a crypto id (e.g. "bitcoin", "ethereum") or a stock ticker (e.g. "AAPL").</div>`;
     return;

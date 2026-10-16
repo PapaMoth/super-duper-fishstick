@@ -3,7 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clock, Weather, Timers &amp; Alarms</title>
+<title>Desktop Clock — Weather, Timers, Alarms &amp; Market Tracker</title>
+<meta name="description" content="A free one-page clock dashboard with digital or analog display, live local weather, traffic links, 30-minute/1-hour/3-hour timers, three alarms, and a stock &amp; crypto price tracker. Built to run as a screensaver.">
+<meta name="keywords" content="clock app, digital clock, analog clock, weather clock, alarm clock, countdown timer, stock tracker, crypto tracker, screensaver clock">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://github.com/PapaMoth/super-duper-fishstick">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Desktop Clock — Weather, Timers, Alarms &amp; Market Tracker">
+<meta property="og:description" content="A free one-page clock dashboard with digital or analog display, live local weather, timers, alarms, and a stock &amp; crypto tracker.">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Desktop Clock — Weather, Timers, Alarms &amp; Market Tracker">
+<meta name="twitter:description" content="A free one-page clock dashboard with digital or analog display, live local weather, timers, alarms, and a stock &amp; crypto tracker.">
+
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,6 +30,7 @@
 
   <!-- Center: clock, weather, timers, alarms -->
   <main class="center">
+    <h1 class="sr-only">Desktop Clock with Weather, Timers, Alarms, and Stock &amp; Crypto Tracker</h1>
     <section class="clock-section">
       <div class="clock-toggle">
         <button class="btn small toggle-btn active" data-clock-mode="digital">Digital</button>
@@ -37,6 +51,7 @@
         </select>
         <button id="tracker-add-btn" class="btn small">Add</button>
       </div>
+      <div id="tracker-count" class="tracker-count">0 / 6 tickers</div>
       <div id="tracker-status" class="status"></div>
       <div id="tracker-list" class="tracker-list"></div>
     </section>
