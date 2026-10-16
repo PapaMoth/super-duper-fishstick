@@ -101,14 +101,32 @@ function setupSoundPicker({ cards, storageKey, defaultLabelPrefix, onChange }) {
     });
   });
 
+  // One Audio element per card is reused across repeated plays instead of
+  // creating a new one on every ringing tick — a longer custom sound would
+  // otherwise overlap itself repeatedly, and dismissing only cleared the
+  // interval, so an already-playing sound kept going after dismissal.
+  const activeAudioEls = Array.from(cards).map(() => null);
+
   return {
     play(index, fallbackFrequency) {
       const custom = sounds[index];
       if (custom && custom.dataUrl) {
-        const audio = new Audio(custom.dataUrl);
+        let audio = activeAudioEls[index];
+        if (!audio) {
+          audio = new Audio(custom.dataUrl);
+          activeAudioEls[index] = audio;
+        }
+        audio.currentTime = 0;
         audio.play().catch(() => { /* autoplay may be blocked until user interacts */ });
       } else {
         playTone(fallbackFrequency);
+      }
+    },
+    stop(index) {
+      const audio = activeAudioEls[index];
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
       }
     }
   };
@@ -185,6 +203,7 @@ const alarmDismissBtn = document.getElementById("alarm-dismiss");
 const ALARM_TONES = [880, 659, 523]; // A5, E5, C5 — each alarm sounds different by default
 const STORAGE_KEY = "clockapp-alarms";
 let ringingInterval = null;
+let ringingAlarmIndex = null;
 
 const alarmSoundPicker = setupSoundPicker({
   cards: alarmCards,
@@ -259,7 +278,11 @@ alarmCards.forEach((card) => {
 // current minute to be observed, so a throttled/backgrounded tab that misses
 // a tick (e.g. two polls land in the same minute, or a minute is skipped
 // entirely) still fires the alarm instead of silently missing it.
-let lastCheckedMinutes = Math.floor(Date.now() / 60000);
+// Start one minute behind "now" rather than exactly at it: the half-open
+// (lastCheckedMinutes, nowMinutes] window used below would otherwise
+// permanently exclude an alarm set for the exact minute the page loaded in
+// (it's never "crossed" relative to itself), so it could never fire.
+let lastCheckedMinutes = Math.floor(Date.now() / 60000) - 1;
 
 function checkAlarms() {
   const now = new Date();
@@ -292,8 +315,10 @@ function triggerAlarm(cardIndex, time) {
   alarmOverlayText.textContent = `Alarm ${cardIndex + 1} — ${time}`;
   alarmOverlayNote.textContent = note ? `“${note}”` : "";
   alarmOverlay.classList.remove("hidden");
-  alarmSoundPicker.play(cardIndex, ALARM_TONES[cardIndex]);
   if (ringingInterval) clearInterval(ringingInterval);
+  if (ringingAlarmIndex !== null) alarmSoundPicker.stop(ringingAlarmIndex);
+  ringingAlarmIndex = cardIndex;
+  alarmSoundPicker.play(cardIndex, ALARM_TONES[cardIndex]);
   ringingInterval = setInterval(() => alarmSoundPicker.play(cardIndex, ALARM_TONES[cardIndex]), 1200);
 }
 
@@ -302,6 +327,10 @@ alarmDismissBtn.addEventListener("click", () => {
   if (ringingInterval) {
     clearInterval(ringingInterval);
     ringingInterval = null;
+  }
+  if (ringingAlarmIndex !== null) {
+    alarmSoundPicker.stop(ringingAlarmIndex);
+    ringingAlarmIndex = null;
   }
 });
 

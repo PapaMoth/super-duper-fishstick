@@ -100,12 +100,18 @@ updateClock();
 
 // A plain `fetch` has no deadline of its own: a stalled upstream connection
 // (accepted but never completed) would otherwise leave a panel stuck on its
-// loading state forever. This aborts and rejects after `timeoutMs`.
-async function fetchWithTimeout(url, timeoutMs = 10000) {
+// loading state forever. This aborts and rejects after `timeoutMs` — and
+// keeps the deadline armed through `parse` (res.json()/res.text()), since a
+// response whose headers arrive promptly but whose body stalls would
+// otherwise hang indefinitely once the timer was cleared after just the
+// initial fetch() settled.
+async function fetchWithTimeout(url, { timeoutMs = 10000, parse } = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(url, { signal: controller.signal });
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) throw new Error("Request failed");
+    return parse ? await parse(res) : res;
   } finally {
     clearTimeout(timer);
   }
@@ -155,10 +161,7 @@ async function onLocationSuccess(pos, requestId) {
   weatherStatus.textContent = "Fetching weather…";
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`;
-    const res = await fetchWithTimeout(url);
-    if (requestId !== weatherRequestId) return;
-    if (!res.ok) throw new Error("Weather request failed");
-    const data = await res.json();
+    const data = await fetchWithTimeout(url, { parse: (res) => res.json() });
     if (requestId !== weatherRequestId) return;
     renderWeather(data, latitude, longitude);
   } catch (err) {
@@ -348,9 +351,7 @@ function renderTrackerList() {
 
 async function fetchCryptoPrice(id) {
   const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(id)}&vs_currencies=usd&include_24hr_change=true`;
-  const res = await fetchWithTimeout(url);
-  if (!res.ok) throw new Error("Request failed");
-  const data = await res.json();
+  const data = await fetchWithTimeout(url, { parse: (res) => res.json() });
   const entry = data[id];
   if (!entry) throw new Error("Unknown crypto id");
   return { price: entry.usd, changePct: entry.usd_24h_change };
@@ -359,9 +360,7 @@ async function fetchCryptoPrice(id) {
 async function fetchStockPrice(symbol) {
   // Stooq offers free, key-free delayed quotes via CSV.
   const url = `https://stooq.com/q/l/?s=${encodeURIComponent(symbol.toLowerCase())}.us&f=sd2t2ohlcv&h&e=csv`;
-  const res = await fetchWithTimeout(url);
-  if (!res.ok) throw new Error("Request failed");
-  const text = await res.text();
+  const text = await fetchWithTimeout(url, { parse: (res) => res.text() });
   const rows = text.trim().split("\n");
   if (rows.length < 2) throw new Error("No data");
   const cols = rows[1].split(",");
@@ -374,12 +373,23 @@ async function fetchStockPrice(symbol) {
 }
 
 let trackerRefreshInProgress = false;
+let trackerRefreshQueued = false;
 
 async function refreshTrackerPrices(force) {
   // A slow upstream response (Stooq/CoinGecko hanging) could otherwise let
   // the next 60s interval start a second overlapping pass over the same
-  // assets, multiplying outbound requests and worsening rate limiting.
-  if (trackerRefreshInProgress) return;
+  // assets, multiplying outbound requests and worsening rate limiting. But a
+  // refresh request that arrives while one is already running (e.g. a new
+  // asset was just added and re-rendered) isn't just dropped — it's queued
+  // to run once more right after, so a freshly rendered "Loading…" row
+  // doesn't sit stuck until the next 60s tick.
+  if (trackerRefreshInProgress) {
+    // Queue a follow-up regardless of this call's own `force` value: a
+    // newly added asset isn't in the cache yet, so even a non-forced
+    // follow-up run still picks it up.
+    trackerRefreshQueued = true;
+    return;
+  }
   trackerRefreshInProgress = true;
   try {
     for (const asset of trackedAssets) {
@@ -399,6 +409,10 @@ async function refreshTrackerPrices(force) {
     }
   } finally {
     trackerRefreshInProgress = false;
+    if (trackerRefreshQueued) {
+      trackerRefreshQueued = false;
+      refreshTrackerPrices(false);
+    }
   }
 }
 
