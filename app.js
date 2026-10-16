@@ -549,3 +549,73 @@ document.addEventListener("fullscreenchange", () => {
     exitScreensaverMode();
   }
 });
+
+// Automatically enter screensaver mode after 10 minutes of no mouse,
+// keyboard, click, or touch activity anywhere on the page.
+const AUTO_SCREENSAVER_IDLE_MS = 10 * 60 * 1000;
+let autoScreensaverTimeout = null;
+
+function resetAutoScreensaverTimer() {
+  clearTimeout(autoScreensaverTimeout);
+  if (screensaverActive) return;
+  autoScreensaverTimeout = setTimeout(() => {
+    if (!screensaverActive) enterScreensaverMode();
+  }, AUTO_SCREENSAVER_IDLE_MS);
+}
+
+["mousemove", "keydown", "click", "touchstart", "wheel"].forEach((evt) => {
+  document.addEventListener(evt, resetAutoScreensaverTimer, { passive: true });
+});
+resetAutoScreensaverTimer();
+
+// ---------- Background Image Upload ----------
+const BG_IMAGE_STORAGE_KEY = "clockapp-bg-image";
+const bgUploadBtn = document.getElementById("bg-upload-btn");
+const bgUploadInput = document.getElementById("bg-upload-input");
+const bgClearBtn = document.getElementById("bg-clear-btn");
+
+function applyBackgroundImage(dataUrl) {
+  if (dataUrl) {
+    document.body.style.backgroundImage = `url("${dataUrl}")`;
+    document.body.classList.add("has-bg-image");
+    bgClearBtn.classList.remove("hidden");
+  } else {
+    document.body.style.backgroundImage = "";
+    document.body.classList.remove("has-bg-image");
+    bgClearBtn.classList.add("hidden");
+  }
+}
+
+bgUploadBtn.addEventListener("click", () => bgUploadInput.click());
+
+bgUploadInput.addEventListener("change", () => {
+  const file = bgUploadInput.files && bgUploadInput.files[0];
+  if (!file) return;
+  if (!file.type.startsWith("image/")) {
+    alert("Please choose an image file.");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = reader.result;
+    applyBackgroundImage(dataUrl);
+    try { localStorage.setItem(BG_IMAGE_STORAGE_KEY, dataUrl); } catch (e) {
+      // localStorage has a size limit (~5MB); a large photo may not persist
+      // across reloads, but it still applies for the current session.
+    }
+  };
+  reader.readAsDataURL(file);
+  bgUploadInput.value = "";
+});
+
+bgClearBtn.addEventListener("click", () => {
+  applyBackgroundImage(null);
+  try { localStorage.removeItem(BG_IMAGE_STORAGE_KEY); } catch (e) { /* storage unavailable */ }
+});
+
+(function restoreBackgroundImage() {
+  try {
+    const saved = localStorage.getItem(BG_IMAGE_STORAGE_KEY);
+    if (saved) applyBackgroundImage(saved);
+  } catch (e) { /* storage unavailable */ }
+})();
