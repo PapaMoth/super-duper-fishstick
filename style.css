@@ -477,6 +477,10 @@ section h2 {
 }
 
 @media (max-width: 900px) {
+  html, body {
+    overflow-y: auto;
+    height: auto;
+  }
   .app-grid {
     grid-template-columns: 1fr;
     grid-template-rows: 60px auto 60px auto 60px;
@@ -486,6 +490,11 @@ section h2 {
       "bottom"
       "left"
       "right";
+    height: auto;
+    min-height: 100vh;
+  }
+  .center {
+    overflow-y: visible;
   }
   .timers-grid, .alarms-grid {
     grid-template-columns: 1fr;

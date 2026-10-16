@@ -107,6 +107,19 @@ setInterval(updateClock, 1000);
 applyClockMode();
 updateClock();
 
+// A plain `fetch` has no deadline of its own: a stalled upstream connection
+// (accepted but never completed) would otherwise leave a panel stuck on its
+// loading state forever. This aborts and rejects after `timeoutMs`.
+async function fetchWithTimeout(url, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // ---------- Weather (Open-Meteo, no API key required) ----------
 const weatherBtn = document.getElementById("weather-btn");
 const weatherResult = document.getElementById("weather-result");
@@ -151,7 +164,7 @@ async function onLocationSuccess(pos, requestId) {
   weatherStatus.textContent = "Fetching weather…";
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`;
-    const res = await fetch(url);
+    const res = await fetchWithTimeout(url);
     if (requestId !== weatherRequestId) return;
     if (!res.ok) throw new Error("Weather request failed");
     const data = await res.json();
@@ -305,7 +318,15 @@ function saveAlarms() {
     time: card.querySelector(".alarm-time").value,
     enabled: card.querySelector(".alarm-enabled").checked
   }));
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { /* storage unavailable */ }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    // The in-memory alarm still works for this session; only persistence
+    // across reloads is lost, so tell the user rather than fail silently.
+    alarmCards.forEach((card) => {
+      card.querySelector("[data-status]").textContent += " (not saved — storage unavailable)";
+    });
+  }
 }
 
 function updateAlarmStatus(card) {
@@ -481,7 +502,13 @@ function loadTrackedAssets() {
 }
 
 function saveTrackedAssets(assets) {
-  try { localStorage.setItem(TRACKER_STORAGE_KEY, JSON.stringify(assets)); } catch (e) { /* storage unavailable */ }
+  try {
+    localStorage.setItem(TRACKER_STORAGE_KEY, JSON.stringify(assets));
+  } catch (e) {
+    // The in-memory list still works for this session; only persistence
+    // across reloads is lost, so tell the user rather than fail silently.
+    trackerStatus.textContent = "Note: your tracker list could not be saved (storage unavailable).";
+  }
 }
 
 const MAX_TRACKED_ASSETS = 6;
@@ -516,8 +543,27 @@ trackerSymbolInput.addEventListener("keydown", (e) => {
 
 function removeTrackedAsset(id, type) {
   trackedAssets = trackedAssets.filter((a) => !(a.id === id && a.type === type));
+  trackerPriceCache.delete(trackerCacheKey({ id, type }));
   saveTrackedAssets(trackedAssets);
   renderTrackerList();
+}
+
+// Caches each asset's last fetched price so that adding or removing one
+// ticker doesn't force every other already-displayed ticker to refetch too
+// (previously, adding 6 tickers one at a time triggered 1+2+...+6 = 21
+// requests instead of 6, which could trip free-tier API rate limits).
+const trackerPriceCache = new Map();
+const trackerCacheKey = (a) => `${a.type}:${a.id}`;
+
+function renderTrackerPriceCell(el, price, changePct) {
+  const dir = changePct >= 0 ? "up" : "down";
+  const sign = changePct >= 0 ? "+" : "";
+  el.textContent = "";
+  el.append(`$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })} `);
+  const change = document.createElement("span");
+  change.className = `tracker-item-change ${dir}`;
+  change.textContent = `${sign}${changePct.toFixed(2)}%`;
+  el.appendChild(change);
 }
 
 function renderTrackerList() {
@@ -555,7 +601,12 @@ function renderTrackerList() {
     const price = document.createElement("span");
     price.className = "tracker-item-price";
     price.dataset.price = "";
-    price.textContent = "Loading…";
+    const cached = trackerPriceCache.get(trackerCacheKey(a));
+    if (cached) {
+      renderTrackerPriceCell(price, cached.price, cached.changePct);
+    } else {
+      price.textContent = "Loading…";
+    }
 
     const removeBtn = document.createElement("button");
     removeBtn.className = "tracker-remove";
@@ -567,12 +618,12 @@ function renderTrackerList() {
     trackerList.appendChild(item);
   });
 
-  refreshTrackerPrices();
+  refreshTrackerPrices(false);
 }
 
 async function fetchCryptoPrice(id) {
   const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(id)}&vs_currencies=usd&include_24hr_change=true`;
-  const res = await fetch(url);
+  const res = await fetchWithTimeout(url);
   if (!res.ok) throw new Error("Request failed");
   const data = await res.json();
   const entry = data[id];
@@ -583,7 +634,7 @@ async function fetchCryptoPrice(id) {
 async function fetchStockPrice(symbol) {
   // Stooq offers free, key-free delayed quotes via CSV.
   const url = `https://stooq.com/q/l/?s=${encodeURIComponent(symbol.toLowerCase())}.us&f=sd2t2ohlcv&h&e=csv`;
-  const res = await fetch(url);
+  const res = await fetchWithTimeout(url);
   if (!res.ok) throw new Error("Request failed");
   const text = await res.text();
   const rows = text.trim().split("\n");
@@ -599,7 +650,7 @@ async function fetchStockPrice(symbol) {
 
 let trackerRefreshInProgress = false;
 
-async function refreshTrackerPrices() {
+async function refreshTrackerPrices(force) {
   // A slow upstream response (Stooq/CoinGecko hanging) could otherwise let
   // the next 60s interval start a second overlapping pass over the same
   // assets, multiplying outbound requests and worsening rate limiting.
@@ -607,20 +658,16 @@ async function refreshTrackerPrices() {
   trackerRefreshInProgress = true;
   try {
     for (const asset of trackedAssets) {
+      const key = trackerCacheKey(asset);
+      if (!force && trackerPriceCache.has(key)) continue; // already shown from cache
       const el = trackerList.querySelector(`.tracker-item[data-id="${CSS.escape(asset.id)}"][data-type="${asset.type}"] [data-price]`);
       if (!el) continue;
       try {
         const { price, changePct } = asset.type === "crypto"
           ? await fetchCryptoPrice(asset.id)
           : await fetchStockPrice(asset.id);
-        const dir = changePct >= 0 ? "up" : "down";
-        const sign = changePct >= 0 ? "+" : "";
-        el.textContent = "";
-        el.append(`$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })} `);
-        const change = document.createElement("span");
-        change.className = `tracker-item-change ${dir}`;
-        change.textContent = `${sign}${changePct.toFixed(2)}%`;
-        el.appendChild(change);
+        trackerPriceCache.set(key, { price, changePct });
+        renderTrackerPriceCell(el, price, changePct);
       } catch (err) {
         el.textContent = "Unavailable";
       }
@@ -631,7 +678,7 @@ async function refreshTrackerPrices() {
 }
 
 renderTrackerList();
-setInterval(refreshTrackerPrices, 60000);
+setInterval(() => refreshTrackerPrices(true), 60000);
 
 (function screensaverDrift() {
   const main = document.querySelector("main.center");
@@ -774,6 +821,7 @@ bgUploadInput.addEventListener("change", () => {
 });
 
 bgClearBtn.addEventListener("click", () => {
+  bgUploadRequestId++; // invalidate any upload whose FileReader hasn't resolved yet
   applyBackgroundImage(null);
   try { localStorage.removeItem(BG_IMAGE_STORAGE_KEY); } catch (e) { /* storage unavailable */ }
 });
