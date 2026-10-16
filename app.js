@@ -619,3 +619,32 @@ bgClearBtn.addEventListener("click", () => {
     if (saved) applyBackgroundImage(saved);
   } catch (e) { /* storage unavailable */ }
 })();
+
+// ---------- Remove Ads — $20 Lifetime (Stripe) ----------
+// NOTE: This is a static, backend-free page, so "purchased" state is only
+// ever a client-side flag — there is no server to verify the payment really
+// happened. Wire REMOVE_ADS_LINK below to a real Stripe Payment Link (create
+// one for a one-time $20 price in the Stripe Dashboard) and set its
+// "After payment" redirect to this page's URL with "?purchased=true"
+// appended. Anyone who knows the URL trick can set the flag without paying;
+// if that matters, this needs a real backend to verify Stripe sessions.
+const ADS_REMOVED_STORAGE_KEY = "clockapp-ads-removed";
+
+function applyAdsRemovedState(removed) {
+  document.body.classList.toggle("ads-removed", removed);
+}
+
+(function initRemoveAds() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("purchased") === "true") {
+    try { localStorage.setItem(ADS_REMOVED_STORAGE_KEY, "true"); } catch (e) { /* storage unavailable */ }
+    // Clean the URL so refreshing/sharing the link doesn't re-trigger this.
+    params.delete("purchased");
+    const cleanUrl = window.location.pathname + (params.toString() ? `?${params}` : "") + window.location.hash;
+    window.history.replaceState({}, "", cleanUrl);
+  }
+
+  let alreadyRemoved = false;
+  try { alreadyRemoved = localStorage.getItem(ADS_REMOVED_STORAGE_KEY) === "true"; } catch (e) { /* storage unavailable */ }
+  applyAdsRemovedState(alreadyRemoved);
+})();
