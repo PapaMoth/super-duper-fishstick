@@ -7,8 +7,17 @@
 // (applyBackgroundFromStorage), so the chosen background/slideshow shows up
 // consistently everywhere.
 const BG_IMAGES_STORAGE_KEY = "clockapp-bg-images";
-const BG_SLIDESHOW_INTERVAL_MS = 8000;
+const BG_SLIDESHOW_INTERVAL_KEY = "clockapp-bg-slideshow-interval";
+const BG_DEFAULT_INTERVAL_S = 8;
 const MAX_BG_IMAGES = 8;
+
+function bgGetIntervalMs() {
+  try {
+    const v = parseInt(localStorage.getItem(BG_SLIDESHOW_INTERVAL_KEY), 10);
+    if (v >= 1 && v <= 120) return v * 1000;
+  } catch (e) { /* ignore */ }
+  return BG_DEFAULT_INTERVAL_S * 1000;
+}
 
 let bgImages = [];
 let bgSlideIndex = 0;
@@ -33,7 +42,7 @@ function bgStartSlideshowIfNeeded(clearBtn) {
     bgSlideInterval = setInterval(() => {
       bgSlideIndex = (bgSlideIndex + 1) % bgImages.length;
       bgApplyCurrentImage(clearBtn);
-    }, BG_SLIDESHOW_INTERVAL_MS);
+    }, bgGetIntervalMs());
   }
 }
 
@@ -95,7 +104,7 @@ function initBackgroundControls({ uploadBtnId, uploadInputId, clearBtnId, status
       persist();
       if (statusEl) {
         statusEl.textContent = dataUrls.length > 1
-          ? `Slideshow of ${dataUrls.length} images (rotates every ${BG_SLIDESHOW_INTERVAL_MS / 1000}s).`
+          ? `Slideshow of ${dataUrls.length} images (rotates every ${bgGetIntervalMs() / 1000}s).`
           : "";
       }
     }).catch(() => {
@@ -116,8 +125,25 @@ function initBackgroundControls({ uploadBtnId, uploadInputId, clearBtnId, status
     if (Array.isArray(saved) && saved.length > 0) {
       bgSetImages(saved, clearBtn);
       if (statusEl && saved.length > 1) {
-        statusEl.textContent = `Slideshow of ${saved.length} images (rotates every ${BG_SLIDESHOW_INTERVAL_MS / 1000}s).`;
+        statusEl.textContent = `Slideshow of ${saved.length} images (rotates every ${bgGetIntervalMs() / 1000}s).`;
       }
     }
   } catch (e) { /* storage unavailable or corrupt */ }
+
+  const timerRange = document.getElementById("bg-timer-range");
+  const timerValue = document.getElementById("bg-timer-value");
+  if (timerRange && timerValue) {
+    const currentS = bgGetIntervalMs() / 1000;
+    timerRange.value = currentS;
+    timerValue.textContent = currentS + "s";
+    timerRange.addEventListener("input", () => {
+      const s = parseInt(timerRange.value, 10);
+      timerValue.textContent = s + "s";
+      try { localStorage.setItem(BG_SLIDESHOW_INTERVAL_KEY, String(s)); } catch (e) { /* ignore */ }
+      bgStartSlideshowIfNeeded(clearBtn);
+      if (statusEl && bgImages.length > 1) {
+        statusEl.textContent = `Slideshow of ${bgImages.length} images (rotates every ${s}s).`;
+      }
+    });
+  }
 }

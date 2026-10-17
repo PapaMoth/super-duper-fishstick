@@ -445,6 +445,17 @@ a.btn {
   color: var(--accent);
 }
 
+.slideshow-timer-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+.slideshow-timer-row input[type="range"] { flex: 1; accent-color: var(--accent); }
+.slideshow-timer-row span { min-width: 3em; text-align: right; color: var(--text); font-weight: bold; }
+
 .sound-row {
   display: flex;
   gap: 6px;

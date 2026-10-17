@@ -4,18 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Settings — Clock Display, Screensaver &amp; Background</title>
-<meta name="description" content="Choose a digital or analog clock display, launch the fullscreen screensaver, and set a single background image or a multi-image slideshow shared across the whole site.">
-<meta name="keywords" content="clock settings, digital analog clock toggle, screensaver, background slideshow">
+<meta name="description" content="Choose a digital or analog clock display, launch the fullscreen screensaver, and set a single background image or a multi-image slideshow (up to 120 seconds per slide) shared across the whole site.">
+<meta name="keywords" content="clock settings, digital analog clock toggle, screensaver, background slideshow, slideshow timer, android app">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://github.com/PapaMoth/super-duper-fishstick">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="Settings — Clock Display, Screensaver &amp; Background">
-<meta property="og:description" content="Choose a digital or analog clock display, launch the fullscreen screensaver, and set a single background image or a multi-image slideshow.">
+<meta property="og:description" content="Choose a digital or analog clock display, launch the fullscreen screensaver, and set a single background image or a multi-image slideshow with an adjustable per-slide timer.">
 
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Settings — Clock Display, Screensaver &amp; Background">
-<meta name="twitter:description" content="Choose a digital or analog clock display, launch the fullscreen screensaver, and set a single background image or a multi-image slideshow.">
+<meta name="twitter:description" content="Choose a digital or analog clock display, launch the fullscreen screensaver, and set a single background image or a multi-image slideshow with an adjustable per-slide timer.">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0f1a">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
 <link rel="stylesheet" href="style.css">
 </head>
@@ -61,7 +66,12 @@
         <input type="file" id="bg-upload-input" accept="image/*" multiple class="hidden" />
       </div>
       <div id="bg-status" class="status"></div>
-      <div class="status">Pick one image for a static background, or several at once for a slideshow. Shows on every page.</div>
+      <div class="slideshow-timer-row">
+        <label for="bg-timer-range">Slideshow speed:</label>
+        <input type="range" id="bg-timer-range" min="1" max="120" value="8" />
+        <span id="bg-timer-value">8s</span>
+      </div>
+      <div class="status">Pick one image for a static background, or several at once for a slideshow (up to 120s per slide). Shows on every page.</div>
     </section>
   </main>
 
@@ -75,5 +85,6 @@
 
 <script src="background.js"></script>
 <script src="settings.js"></script>
+<script src="pwa.js"></script>
 </body>
 </html>

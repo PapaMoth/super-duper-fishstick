@@ -3,29 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Desktop Clock — Weather, Traffic &amp; Market Tracker</title>
-<meta name="description" content="A free one-page clock dashboard with a switchable digital or analog display, a dedicated fullscreen screensaver mode, live local weather with a link to a live traffic map, and a stock &amp; crypto price tracker (up to 6 tickers). Alarms, timers, and a calendar live on a separate page.">
-<meta name="keywords" content="clock app, digital clock, analog clock, digital analog clock toggle, screensaver, screensaver clock, fullscreen clock, weather clock, stock tracker, crypto tracker">
+<title>Alarm Clock with Weather and Traffic</title>
+<meta name="description" content="A free, installable alarm clock app with weather and traffic info, a switchable digital or analog display, fullscreen screensaver mode, stock &amp; crypto price tracker (up to 6 tickers), calendar with alarms and timers. Works as an Android/desktop app.">
+<meta name="keywords" content="alarm clock, weather clock, traffic, digital clock, analog clock, screensaver, stock tracker, crypto tracker, installable web app, android app, PWA">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://github.com/PapaMoth/super-duper-fishstick">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Desktop Clock — Weather, Traffic &amp; Market Tracker">
-<meta property="og:description" content="A free one-page clock dashboard with a switchable digital or analog display, a fullscreen screensaver mode, live local weather and traffic map links, and a stock &amp; crypto tracker.">
+<meta property="og:title" content="Alarm Clock with Weather and Traffic">
+<meta property="og:description" content="A free alarm clock app with weather and traffic info, digital/analog display, screensaver, stock &amp; crypto tracker, calendar with alarms and timers.">
 
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Desktop Clock — Weather, Traffic &amp; Market Tracker">
-<meta name="twitter:description" content="A free one-page clock dashboard with a switchable digital or analog display, a fullscreen screensaver mode, live local weather and traffic map links, and a stock &amp; crypto tracker.">
+<meta name="twitter:title" content="Alarm Clock with Weather and Traffic">
+<meta name="twitter:description" content="A free alarm clock app with weather and traffic info, digital/analog display, screensaver, stock &amp; crypto tracker, calendar with alarms and timers.">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0f1a">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
 <link rel="stylesheet" href="style.css">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Desktop Clock — Weather, Traffic & Market Tracker",
+  "name": "Alarm Clock with Weather and Traffic",
   "applicationCategory": "UtilitiesApplication",
   "operatingSystem": "Any",
-  "description": "A free dashboard that switches between a digital or analog clock display, shows live local weather and a link to a live traffic map, tracks up to six stocks or crypto tickers, supports a photo or slideshow background, and includes a dedicated fullscreen screensaver mode. Alarms, timers, and a calendar are on a linked page.",
+  "description": "A free alarm clock app with weather and traffic info, digital/analog display, screensaver, stock and crypto tracker, calendar with alarms and timers.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -106,5 +111,6 @@
 
 <script src="background.js"></script>
 <script src="app.js"></script>
+<script src="pwa.js"></script>
 </body>
 </html>
