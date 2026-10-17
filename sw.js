@@ -40,18 +40,24 @@ self.addEventListener("fetch", (event) => {
   // (weather/tracker APIs, cross-origin) goes straight to the network.
   if (event.request.method !== "GET" || url.origin !== self.location.origin) return;
 
+  const cacheKey = new Request(url.origin + url.pathname);
+
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const network = fetch(event.request)
+    caches.match(cacheKey).then((cached) => {
+      const networkPromise = fetch(event.request)
         .then((response) => {
           if (response.ok) {
             const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+            caches.open(CACHE_NAME).then((cache) => cache.put(cacheKey, copy));
           }
           return response;
         })
         .catch(() => cached);
-      return cached || network;
+      if (cached) {
+        event.waitUntil(networkPromise);
+        return cached;
+      }
+      return networkPromise;
     })
   );
 });

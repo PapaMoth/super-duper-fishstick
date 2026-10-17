@@ -12,6 +12,7 @@ const BG_DEFAULT_INTERVAL_S = 8;
 const MAX_BG_IMAGES = 8;
 
 function bgGetIntervalMs() {
+  if (bgOverrideIntervalMs != null) return bgOverrideIntervalMs;
   try {
     const v = parseInt(localStorage.getItem(BG_SLIDESHOW_INTERVAL_KEY), 10);
     if (v >= 1 && v <= 120) return v * 1000;
@@ -22,6 +23,7 @@ function bgGetIntervalMs() {
 let bgImages = [];
 let bgSlideIndex = 0;
 let bgSlideInterval = null;
+let bgOverrideIntervalMs = null;
 
 function bgApplyCurrentImage(clearBtn) {
   if (bgImages.length === 0) {
@@ -141,6 +143,7 @@ function initBackgroundControls({ uploadBtnId, uploadInputId, clearBtnId, status
     timerRange.addEventListener("input", () => {
       const s = parseInt(timerRange.value, 10);
       timerValue.textContent = s + "s";
+      bgOverrideIntervalMs = s * 1000;
       try { localStorage.setItem(BG_SLIDESHOW_INTERVAL_KEY, String(s)); } catch (e) { /* ignore */ }
       bgStartSlideshowIfNeeded(clearBtn);
       if (statusEl && bgImages.length > 1) {
