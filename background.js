@@ -76,8 +76,10 @@ function initBackgroundControls({ uploadBtnId, uploadInputId, clearBtnId, status
   function persist() {
     try {
       localStorage.setItem(BG_IMAGES_STORAGE_KEY, JSON.stringify(bgImages));
+      return true;
     } catch (e) {
       if (statusEl) statusEl.textContent = "Note: background could not be saved (storage limit) — it still shows for this session.";
+      return false;
     }
   }
 
@@ -101,8 +103,8 @@ function initBackgroundControls({ uploadBtnId, uploadInputId, clearBtnId, status
     }))).then((dataUrls) => {
       if (thisRequest !== requestId) return; // a newer selection has started
       bgSetImages(dataUrls, clearBtn);
-      persist();
-      if (statusEl) {
+      const saved = persist();
+      if (saved && statusEl) {
         statusEl.textContent = dataUrls.length > 1
           ? `Slideshow of ${dataUrls.length} images (rotates every ${bgGetIntervalMs() / 1000}s).`
           : "";

@@ -46,8 +46,12 @@ function setupSoundPicker({ cards, storageKey, defaultLabelPrefix, onChange }) {
 
   function save() {
     try { localStorage.setItem(storageKey, JSON.stringify(sounds)); } catch (e) {
-      // Custom sounds are data URLs and can exceed localStorage's ~5MB quota;
-      // the sound still plays for the current session even if it can't persist.
+      cards.forEach((card, ci) => {
+        if (sounds[ci]) {
+          const nameEl = card.querySelector("[data-sound-name]");
+          if (nameEl) nameEl.textContent = sounds[ci].name + " (won't persist — storage full)";
+        }
+      });
     }
   }
 
@@ -85,6 +89,10 @@ function setupSoundPicker({ cards, storageKey, defaultLabelPrefix, onChange }) {
       }
       const reader = new FileReader();
       reader.onload = () => {
+        if (activeAudioEls[i]) {
+          activeAudioEls[i].pause();
+          activeAudioEls[i] = null;
+        }
         sounds[i] = { dataUrl: reader.result, name: file.name };
         applyUI(card, i);
         save();

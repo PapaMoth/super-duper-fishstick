@@ -16,7 +16,7 @@ function applyClockModeButtons() {
 document.querySelectorAll("[data-clock-mode]").forEach((btn) => {
   btn.addEventListener("click", () => {
     clockMode = btn.dataset.clockMode;
-    try { localStorage.setItem(CLOCK_MODE_KEY, clockMode); } catch (e) { /* storage unavailable */ }
+    try { localStorage.setItem(CLOCK_MODE_KEY, clockMode); } catch (e) { btn.closest(".settings-section").querySelector(".status").textContent = "Note: clock display could not be saved (storage unavailable)."; }
     applyClockModeButtons();
   });
 });

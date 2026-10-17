@@ -17,6 +17,7 @@
 
 body.screensaver-mode .ad,
 body.screensaver-mode .tracker-section,
+body.screensaver-mode .traffic-body,
 body.screensaver-mode .site-nav {
   display: none !important;
 }

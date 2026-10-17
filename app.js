@@ -182,30 +182,60 @@ function renderWeather(data, lat, lon) {
   const desc = WEATHER_CODES[c.weather_code] || "Unknown conditions";
   weatherStatus.textContent = "";
   weatherBtn.textContent = "Refresh";
-  weatherResult.innerHTML = `
-    <div class="weather-location">Lat ${lat.toFixed(2)}, Lon ${lon.toFixed(2)}</div>
-    <div class="weather-main">
-      <div class="weather-temp">${Math.round(c.temperature_2m)}°F</div>
-      <div>
-        <div>${desc}</div>
-        <div class="weather-detail">Feels like ${Math.round(c.apparent_temperature)}°F</div>
-      </div>
-    </div>
-    <div class="weather-detail">Humidity ${c.relative_humidity_2m}% · Wind ${Math.round(c.wind_speed_10m)} mph</div>
-  `;
+  weatherResult.textContent = "";
+
+  const locDiv = document.createElement("div");
+  locDiv.className = "weather-location";
+  locDiv.textContent = `Lat ${lat.toFixed(2)}, Lon ${lon.toFixed(2)}`;
+
+  const tempDiv = document.createElement("div");
+  tempDiv.className = "weather-temp";
+  tempDiv.textContent = `${Math.round(c.temperature_2m)}°F`;
+
+  const descDiv = document.createElement("div");
+  descDiv.textContent = desc;
+  const feelsDiv = document.createElement("div");
+  feelsDiv.className = "weather-detail";
+  feelsDiv.textContent = `Feels like ${Math.round(c.apparent_temperature)}°F`;
+  const descWrap = document.createElement("div");
+  descWrap.appendChild(descDiv);
+  descWrap.appendChild(feelsDiv);
+
+  const mainDiv = document.createElement("div");
+  mainDiv.className = "weather-main";
+  mainDiv.appendChild(tempDiv);
+  mainDiv.appendChild(descWrap);
+
+  const detailDiv = document.createElement("div");
+  detailDiv.className = "weather-detail";
+  detailDiv.textContent = `Humidity ${c.relative_humidity_2m}% · Wind ${Math.round(c.wind_speed_10m)} mph`;
+
+  weatherResult.appendChild(locDiv);
+  weatherResult.appendChild(mainDiv);
+  weatherResult.appendChild(detailDiv);
 }
 
 // Traffic: no key-free live traffic API exists, so we link out to a map
 // centered on the user's coordinates rather than fake live data.
 function renderTrafficPlaceholder(lat, lon) {
   trafficStatus.textContent = "";
-  trafficResult.innerHTML = `
-    <div>Live traffic data requires a mapping API key (e.g. Google Maps, TomTom, HERE).</div>
-    <a class="btn" style="text-decoration:none;display:inline-block;margin-top:8px"
-       href="https://www.google.com/maps/@${lat},${lon},12z/data=!5m1!1e1" target="_blank" rel="noopener">
-       Open Live Traffic Map
-    </a>
-  `;
+  trafficResult.textContent = "";
+
+  const info = document.createElement("div");
+  info.textContent = "Live traffic data requires a mapping API key (e.g. Google Maps, TomTom, HERE).";
+
+  const link = document.createElement("a");
+  link.className = "btn";
+  link.style.textDecoration = "none";
+  link.style.display = "inline-block";
+  link.style.marginTop = "8px";
+  link.href = `https://www.google.com/maps/@${encodeURIComponent(lat)},${encodeURIComponent(lon)},12z/data=!5m1!1e1`;
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.textContent = "Open Live Traffic Map";
+
+  trafficResult.appendChild(info);
+  trafficResult.appendChild(link);
 }
 
 // ---------- Stock & Crypto Tracker ----------
