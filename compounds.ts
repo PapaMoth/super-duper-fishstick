@@ -17,7 +17,7 @@ export const compounds: Compound[] = [
     status: "no-pathway",
     statusNote:
       "Never FDA-approved and never placed on an FDA drug shortage list — both are preconditions for a 503A/503B compounding exception. No legal compounding pathway currently exists under any formulation theory.",
-    lastChanged: "2026-03-31",
+    lastChanged: "2026-10-19",
     enforcement: [
       {
         date: "2026-03-31",
@@ -32,10 +32,18 @@ export const compounds: Compound[] = [
           "Multiple vendors (Prime Sciences, Mile High Compounds, Pink Pony Peptides, PekCura Labs) cited for selling retatrutide under coded names (e.g. 'GLP-3 RT') to evade RUO scrutiny.",
         source: "https://caminostrategygroup.com/resources/retatrutide",
       },
+      {
+        date: "2026-08-24",
+        summary:
+          "FDA warning letters to five online vendors (Peak Performance Peptides, Royal Peptides, NuScience Peptides, Peptide Partners, TXP Innovations) again named retatrutide — marketed under coded names such as 'GLP-3 RT', 'GLP-3 Reta', and 'GLP-3R' — as an unapproved new drug.",
+        source:
+          "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/nuscience-peptides-llc-733652-08242026",
+      },
     ],
     sources: [
       "https://caminostrategygroup.com/resources/retatrutide",
       "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/gram-peptides-721806-03312026",
+      "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/nuscience-peptides-llc-733652-08242026",
     ],
   },
   {
@@ -72,14 +80,23 @@ export const compounds: Compound[] = [
       "A glucagon-like peptide-1 (GLP-1) receptor agonist medication used to treat type 2 diabetes, manage chronic weight, and lower the risk of major heart and kidney events. Approved as Ozempic (T2D) and Wegovy (obesity). One of the most widely prescribed weight-loss drugs. Shortage resolved February 2025, ending most compounding exceptions.",
     status: "contested",
     statusNote:
-      "Shortage resolved Feb 2025, ending the compounding exception for most pharmacies. FDA proposed permanently excluding semaglutide from the 503B bulk substances list; after a 30-day extension, the comment period closed July 30, 2026, and as of this writing FDA has not issued a final rule. Some pharmacies continue compounding under differentiated-formulation theories similar to tirzepatide.",
-    lastChanged: "2026-10-18",
+      "Shortage resolved Feb 2025, ending the compounding exception for most pharmacies. FDA proposed (Apr 30, 2026) permanently excluding semaglutide from the 503B bulk substances list; the comment period, originally set to close June 29, 2026, was extended 30 days to July 30, 2026, and FDA has not issued a final rule as of this writing. Some pharmacies continue compounding under differentiated-formulation theories similar to tirzepatide.",
+    lastChanged: "2026-10-19",
     shortageListHistory: "Removed from FDA shortage list February 2025.",
-    enforcement: [],
+    enforcement: [
+      {
+        date: "2026-08-24",
+        summary:
+          "FDA warning letters to five online vendors (Peak Performance Peptides, Royal Peptides, NuScience Peptides, Peptide Partners, TXP Innovations) named semaglutide-labeled research peptides (e.g. NuScience's 'GLP-1 Sema Research Peptide') as unapproved new drugs.",
+        source:
+          "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/nuscience-peptides-llc-733652-08242026",
+      },
+    ],
     sources: [
       "https://www.pharmacytimes.com/view/fda-moves-to-permanently-close-the-door-on-compounded-glp-1s",
       "https://www.doctronic.ai/blog/peptides-compounding-pharmacy-2026/",
       "https://www.federalregister.gov/documents/2026/06/26/2026-12937/list-of-bulk-drug-substances-for-which-there-is-a-clinical-need-under-section-503b-of-the-federal",
+      "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/nuscience-peptides-llc-733652-08242026",
     ],
   },
   {
@@ -90,8 +107,8 @@ export const compounds: Compound[] = [
       "A GLP-1 receptor agonist approved as Victoza (T2D) and Saxenda (obesity). Older than semaglutide with a shorter half-life requiring daily injection. Proposed for permanent exclusion from the 503B bulk substances list.",
     status: "restricted",
     statusNote:
-      "Named alongside semaglutide and tirzepatide in FDA's proposed permanent exclusion from the 503B outsourcing-facility bulk substances list; after a 30-day extension, the comment period closed July 30, 2026, with no final rule issued as of this writing.",
-    lastChanged: "2026-10-18",
+      "Named alongside semaglutide and tirzepatide in FDA's proposed (Apr 30, 2026) permanent exclusion from the 503B outsourcing-facility bulk substances list. The comment period, originally set to close June 29, 2026, was extended 30 days to July 30, 2026, and FDA has not issued a final rule as of this writing.",
+    lastChanged: "2026-10-19",
     enforcement: [],
     sources: [
       "https://www.pharmacytimes.com/view/fda-moves-to-permanently-close-the-door-on-compounded-glp-1s",
@@ -106,10 +123,15 @@ export const compounds: Compound[] = [
       "Body Protection Compound-157 — a synthetic 15-amino-acid peptide derived from a gastric protein. Studied in animal models for tendon, muscle, and GI repair. No human clinical trials completed; not FDA-approved.",
     status: "restricted",
     statusNote:
-      "On the restricted bulk substances list — not eligible for 503A compounding. Frequently sold RUO despite this; FDA treats RUO labeling as immaterial when site context (dosing guidance, health claims) implies human use.",
-    lastChanged: "2026-01-01",
+      "On the restricted bulk substances list — not eligible for 503A compounding. Frequently sold RUO despite this; FDA treats RUO labeling as immaterial when site context (dosing guidance, health claims) implies human use. FDA withdrew BPC-157 from its interim Category 2 safety-risk list in April 2026 after the nomination was withdrawn, and on July 23, 2026 FDA's Pharmacy Compounding Advisory Committee voted to recommend adding BPC-157 to the 503A Bulks List over FDA staff's own objection. The vote is advisory only — FDA has not added BPC-157 to the 503A Bulks List or issued a final rule as of this writing, so its compounding eligibility remains unsettled.",
+    lastChanged: "2026-10-19",
     enforcement: [],
-    sources: ["https://www.doctronic.ai/blog/peptide-fda-status-tracker/"],
+    sources: [
+      "https://www.doctronic.ai/blog/peptide-fda-status-tracker/",
+      "https://www.fda.gov/drugs/human-drug-compounding/certain-bulk-drug-substances-use-compounding-may-present-significant-safety-risks",
+      "https://www.fda.gov/advisory-committees/advisory-committee-calendar/july-23-24-2026-meeting-pharmacy-compounding-advisory-committee-07232026",
+      "https://www.bipc.com/fda-voted-yes-on-six-peptides-now-what-the-regulatory-road-ahead",
+    ],
   },
   {
     slug: "tb-500",
@@ -119,10 +141,15 @@ export const compounds: Compound[] = [
       "A synthetic fragment of Thymosin Beta-4, a protein involved in actin regulation and tissue repair. Animal studies suggest wound-healing and anti-inflammatory effects. Not FDA-approved; no completed human clinical trials.",
     status: "restricted",
     statusNote:
-      "On the restricted bulk substances list — not eligible for 503A compounding.",
-    lastChanged: "2026-01-01",
+      "On the restricted bulk substances list — not eligible for 503A compounding. FDA withdrew TB-500 (Thymosin Beta-4 fragment) from its interim Category 2 safety-risk list in April 2026 after the nomination was withdrawn, and on July 23, 2026 FDA's Pharmacy Compounding Advisory Committee voted to recommend adding TB-500 to the 503A Bulks List over FDA staff's own objection. The vote is advisory only — FDA has not added TB-500 to the 503A Bulks List or issued a final rule as of this writing, so its compounding eligibility remains unsettled.",
+    lastChanged: "2026-10-19",
     enforcement: [],
-    sources: ["https://www.doctronic.ai/blog/peptide-fda-status-tracker/"],
+    sources: [
+      "https://www.doctronic.ai/blog/peptide-fda-status-tracker/",
+      "https://www.fda.gov/drugs/human-drug-compounding/certain-bulk-drug-substances-use-compounding-may-present-significant-safety-risks",
+      "https://www.fda.gov/advisory-committees/advisory-committee-calendar/july-23-24-2026-meeting-pharmacy-compounding-advisory-committee-07232026",
+      "https://www.bipc.com/fda-voted-yes-on-six-peptides-now-what-the-regulatory-road-ahead",
+    ],
   },
   {
     slug: "cjc-1295",
@@ -132,10 +159,13 @@ export const compounds: Compound[] = [
       "A synthetic analog of growth hormone-releasing hormone (GHRH) with an extended half-life due to a drug affinity complex (DAC) modification. Stimulates pituitary GH release. Not FDA-approved; no marketed drug form exists.",
     status: "restricted",
     statusNote:
-      "Not on the permitted 503A bulk substances list — effectively prohibited from compounding.",
-    lastChanged: "2026-01-01",
+      "Not on the permitted 503A bulk substances list — effectively prohibited from compounding. FDA withdrew CJC-1295 from its interim Category 2 safety-risk list in April 2026 after the nomination was withdrawn. It is not yet on the 503A Bulks List and has not been scheduled for Pharmacy Compounding Advisory Committee review, leaving it in an unsettled middle ground — no longer flagged as a significant safety risk, but still not affirmatively authorized for compounding.",
+    lastChanged: "2026-10-19",
     enforcement: [],
-    sources: ["https://www.doctronic.ai/blog/peptide-fda-status-tracker/"],
+    sources: [
+      "https://www.doctronic.ai/blog/peptide-fda-status-tracker/",
+      "https://www.fda.gov/drugs/human-drug-compounding/certain-bulk-drug-substances-use-compounding-may-present-significant-safety-risks",
+    ],
   },
   {
     slug: "ipamorelin",
@@ -145,19 +175,20 @@ export const compounds: Compound[] = [
       "A selective growth hormone secretagogue and ghrelin receptor agonist. Stimulates GH release with reportedly fewer side effects (cortisol, prolactin) than older secretagogues. Not FDA-approved; often compounded alongside CJC-1295.",
     status: "restricted",
     statusNote:
-      "Not on the permitted 503A bulk substances list — effectively prohibited from compounding.",
-    lastChanged: "2026-10-18",
+      "Not on the permitted 503A bulk substances list — effectively prohibited from compounding. FDA withdrew ipamorelin acetate from its interim Category 2 safety-risk list in April 2026 after the nomination was withdrawn (it remains separately listed in Category 2 under the 503B interim policy). It is not yet on the 503A Bulks List and has not been scheduled for Pharmacy Compounding Advisory Committee review, leaving it in an unsettled middle ground — no longer flagged as a significant safety risk under 503A, but still not affirmatively authorized for compounding.",
+    lastChanged: "2026-10-19",
     enforcement: [
       {
         date: "2026-08-24",
         summary:
-          "FDA warning letter to NuScience Peptides LLC named a 'Tesamorelin Ipamorelin Blend' product as an unapproved new drug, part of a same-day batch of warning letters to five online peptide vendors.",
+          "FDA warning letter to NuScience Peptides LLC named a 'Tesamorelin Ipamorelin Blend' product sold on its website as an unapproved new drug, part of a same-day batch of warning letters to five online peptide vendors.",
         source:
           "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/nuscience-peptides-llc-733652-08242026",
       },
     ],
     sources: [
       "https://www.doctronic.ai/blog/peptide-fda-status-tracker/",
+      "https://www.fda.gov/drugs/human-drug-compounding/certain-bulk-drug-substances-use-compounding-may-present-significant-safety-risks",
       "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/nuscience-peptides-llc-733652-08242026",
     ],
   },
@@ -194,7 +225,7 @@ export const compounds: Compound[] = [
     status: "fda-approved",
     statusNote:
       "FDA-approved (Vyleesi) — compounding is restricted to narrow 503A/503B carve-outs (e.g. a medically necessary dosage-form or strength change for an individual patient), not open compounding of the approved drug.",
-    lastChanged: "2026-10-18",
+    lastChanged: "2026-10-19",
     enforcement: [
       {
         date: "2026-08-24",
@@ -217,10 +248,13 @@ export const compounds: Compound[] = [
       "A naturally occurring copper-binding tripeptide (Gly-His-Lys) studied for skin repair, collagen stimulation, and anti-inflammatory effects. Widely used in topical cosmetics. Injectable preparations have no FDA approval or legal compounding pathway.",
     status: "restricted",
     statusNote:
-      "Not on the FDA permitted 503A bulk substances list. Widely sold as a topical cosmetic ingredient, but compounding for injectable or systemic use has no established legal pathway. FDA treats injectable preparations as subject to drug-compounding rules regardless of cosmetic marketing.",
-    lastChanged: "2026-01-01",
+      "Not on the FDA permitted 503A bulk substances list. Widely sold as a topical cosmetic ingredient, but compounding for injectable or systemic use has no established legal pathway. FDA treats injectable preparations as subject to drug-compounding rules regardless of cosmetic marketing. FDA withdrew injectable GHK-Cu from its interim Category 2 safety-risk list in April 2026 after the nomination was withdrawn. It is not yet on the 503A Bulks List and has not been scheduled for Pharmacy Compounding Advisory Committee review.",
+    lastChanged: "2026-10-19",
     enforcement: [],
-    sources: ["https://www.doctronic.ai/blog/peptide-fda-status-tracker/"],
+    sources: [
+      "https://www.doctronic.ai/blog/peptide-fda-status-tracker/",
+      "https://www.fda.gov/drugs/human-drug-compounding/certain-bulk-drug-substances-use-compounding-may-present-significant-safety-risks",
+    ],
   },
   {
     slug: "epithalon",
@@ -230,10 +264,15 @@ export const compounds: Compound[] = [
       "A synthetic tetrapeptide (Ala-Glu-Asp-Gly) derived from the pineal gland, studied in Russian research for lengthening telomeres (the protective caps on the ends of chromosomes) and activating telomerase, the enzyme that rebuilds them — theoretically slowing cellular aging. Also claimed to normalize sleep cycles and restore youthful melatonin production. No FDA-approved form exists and it has never appeared on a shortage list — there is no legal compounding pathway.",
     status: "no-pathway",
     statusNote:
-      "Not FDA-approved and not on any drug shortage list. No 503A or 503B compounding pathway exists. Frequently sold RUO; FDA has consistently rejected RUO labels as a defense where human-use intent is evident from site context or dosing instructions.",
-    lastChanged: "2026-01-01",
+      "Not FDA-approved and not on any drug shortage list. No 503A or 503B compounding pathway exists. Frequently sold RUO; FDA has consistently rejected RUO labels as a defense where human-use intent is evident from site context or dosing instructions. FDA withdrew epitalon (its FDA-listed spelling) from its interim Category 2 safety-risk list in April 2026 after the nomination was withdrawn, and on July 24, 2026 FDA's Pharmacy Compounding Advisory Committee voted to recommend adding it to the 503A Bulks List. The vote is advisory only — FDA has not added it to the 503A Bulks List or issued a final rule as of this writing, so its compounding eligibility remains unsettled.",
+    lastChanged: "2026-10-19",
     enforcement: [],
-    sources: ["https://www.doctronic.ai/blog/peptide-fda-status-tracker/"],
+    sources: [
+      "https://www.doctronic.ai/blog/peptide-fda-status-tracker/",
+      "https://www.fda.gov/drugs/human-drug-compounding/certain-bulk-drug-substances-use-compounding-may-present-significant-safety-risks",
+      "https://www.fda.gov/advisory-committees/advisory-committee-calendar/july-23-24-2026-meeting-pharmacy-compounding-advisory-committee-07232026",
+      "https://www.bipc.com/fda-voted-yes-on-six-peptides-now-what-the-regulatory-road-ahead",
+    ],
   },
   {
     slug: "nad-plus",
@@ -279,10 +318,13 @@ export const compounds: Compound[] = [
       "A modified fragment of human growth hormone (HGH 176-191) designed to stimulate fat metabolism without the insulin-like effects of full HGH. Never FDA-approved; a failed Phase 3 trial for obesity led the developer to pivot to joint-health indications. No legal compounding pathway.",
     status: "no-pathway",
     statusNote:
-      "Not FDA-approved and not on any shortage list. No 503A or 503B pathway exists. Frequently sold RUO alongside other peptide weight-loss compounds.",
-    lastChanged: "2026-01-01",
+      "Not FDA-approved and not on any shortage list. No 503A or 503B pathway exists. Frequently sold RUO alongside other peptide weight-loss compounds. FDA withdrew AOD-9604 from its interim Category 2 safety-risk list in April 2026 after the nomination was withdrawn. It is not yet on the 503A Bulks List and has not been scheduled for Pharmacy Compounding Advisory Committee review.",
+    lastChanged: "2026-10-19",
     enforcement: [],
-    sources: ["https://www.doctronic.ai/blog/peptide-fda-status-tracker/"],
+    sources: [
+      "https://www.doctronic.ai/blog/peptide-fda-status-tracker/",
+      "https://www.fda.gov/drugs/human-drug-compounding/certain-bulk-drug-substances-use-compounding-may-present-significant-safety-risks",
+    ],
   },
   {
     slug: "thymosin-alpha-1",
@@ -292,10 +334,13 @@ export const compounds: Compound[] = [
       "A 28-amino-acid thymic peptide that modulates T-cell function and innate immunity. FDA-approved as Zadaxin in dozens of countries for hepatitis B/C and as an immune adjuvant, but NOT approved in the United States. Used off-label in the US for immune dysfunction, Lyme disease, and long COVID.",
     status: "restricted",
     statusNote:
-      "Not FDA-approved in the US. Not on the 503A permitted bulk substances list. Some compounding pharmacies prepare it under a restricted-use interpretation; regulatory status is contested and subject to FDA discretion.",
-    lastChanged: "2026-01-01",
+      "Not FDA-approved in the US. Not on the 503A permitted bulk substances list. Some compounding pharmacies prepare it under a restricted-use interpretation; regulatory status is contested and subject to FDA discretion. FDA withdrew thymosin-alpha 1 from its interim Category 2 safety-risk list in April 2026 after the nomination was withdrawn. It is not yet on the 503A Bulks List and has not been scheduled for Pharmacy Compounding Advisory Committee review.",
+    lastChanged: "2026-10-19",
     enforcement: [],
-    sources: ["https://www.doctronic.ai/blog/peptide-fda-status-tracker/"],
+    sources: [
+      "https://www.doctronic.ai/blog/peptide-fda-status-tracker/",
+      "https://www.fda.gov/drugs/human-drug-compounding/certain-bulk-drug-substances-use-compounding-may-present-significant-safety-risks",
+    ],
   },
   {
     slug: "tesamorelin",
@@ -306,7 +351,7 @@ export const compounds: Compound[] = [
     status: "fda-approved",
     statusNote:
       "FDA-approved as Egrifta for HIV-associated lipodystrophy. Compounding for off-label indications (e.g. general visceral-fat reduction) falls outside the approved use and is restricted to narrow 503A/503B carve-outs with a valid patient-specific prescription.",
-    lastChanged: "2026-10-18",
+    lastChanged: "2026-10-19",
     enforcement: [
       {
         date: "2026-08-24",
@@ -329,10 +374,15 @@ export const compounds: Compound[] = [
       "A mitochondrial-derived peptide that activates the AMPK pathway (the cell's fuel gauge) and disrupts the folate-methionine cycle to mimic the effects of exercise and metabolic stress. Natural levels of MOTS-c decrease with age and lack of physical activity.",
     status: "no-pathway",
     statusNote:
-      "Not FDA-approved and not on any drug shortage list. No 503A or 503B compounding pathway exists. Sold almost exclusively RUO; FDA has rejected RUO labeling as a defense where dosing instructions or marketing imply human use.",
-    lastChanged: "2026-01-01",
+      "Not FDA-approved and not on any drug shortage list. No 503A or 503B compounding pathway exists. Sold almost exclusively RUO; FDA has rejected RUO labeling as a defense where dosing instructions or marketing imply human use. FDA withdrew MOTS-c from its interim Category 2 safety-risk list in April 2026 after the nomination was withdrawn, and on July 23, 2026 FDA's Pharmacy Compounding Advisory Committee voted to recommend adding it to the 503A Bulks List. The vote is advisory only — FDA has not added it to the 503A Bulks List or issued a final rule as of this writing, so its compounding eligibility remains unsettled.",
+    lastChanged: "2026-10-19",
     enforcement: [],
-    sources: ["https://www.doctronic.ai/blog/peptide-fda-status-tracker/"],
+    sources: [
+      "https://www.doctronic.ai/blog/peptide-fda-status-tracker/",
+      "https://www.fda.gov/drugs/human-drug-compounding/certain-bulk-drug-substances-use-compounding-may-present-significant-safety-risks",
+      "https://www.fda.gov/advisory-committees/advisory-committee-calendar/july-23-24-2026-meeting-pharmacy-compounding-advisory-committee-07232026",
+      "https://www.bipc.com/fda-voted-yes-on-six-peptides-now-what-the-regulatory-road-ahead",
+    ],
   },
   {
     slug: "semax",
@@ -342,10 +392,15 @@ export const compounds: Compound[] = [
       'A synthetic peptide that influences the brain\'s dopaminergic and serotonergic pathways, helping regulate dopamine and serotonin metabolism to support focus, motivation, and mood balance. Explored in nootropic communities and research settings for enhanced focus and attention, memory and learning support, stress resilience and mood support, and neuroprotection — often to combat mental fatigue, "brain fog," or periods requiring heavy intellectual output.',
     status: "no-pathway",
     statusNote:
-      "Not FDA-approved in the US (approved as a prescription drug in Russia) and has no US drug shortage listing. No 503A or 503B compounding pathway. Available in the US primarily through RUO and grey-market vendors.",
-    lastChanged: "2026-01-01",
+      "Not FDA-approved in the US (approved as a prescription drug in Russia) and has no US drug shortage listing. No 503A or 503B compounding pathway. Available in the US primarily through RUO and grey-market vendors. FDA withdrew Semax from its interim Category 2 safety-risk list in April 2026 after the nomination was withdrawn, and on July 24, 2026 FDA's Pharmacy Compounding Advisory Committee voted to recommend adding it to the 503A Bulks List. The vote is advisory only — FDA has not added it to the 503A Bulks List or issued a final rule as of this writing, so its compounding eligibility remains unsettled.",
+    lastChanged: "2026-10-19",
     enforcement: [],
-    sources: ["https://www.doctronic.ai/blog/peptide-fda-status-tracker/"],
+    sources: [
+      "https://www.doctronic.ai/blog/peptide-fda-status-tracker/",
+      "https://www.fda.gov/drugs/human-drug-compounding/certain-bulk-drug-substances-use-compounding-may-present-significant-safety-risks",
+      "https://www.fda.gov/advisory-committees/advisory-committee-calendar/july-23-24-2026-meeting-pharmacy-compounding-advisory-committee-07232026",
+      "https://www.bipc.com/fda-voted-yes-on-six-peptides-now-what-the-regulatory-road-ahead",
+    ],
   },
   {
     slug: "selank",
@@ -355,9 +410,12 @@ export const compounds: Compound[] = [
       "A synthetic heptapeptide analog of tuftsin developed by the Russian Institute of Molecular Genetics. Studied for anxiolytic and nootropic effects without the sedation of benzodiazepines. Not FDA-approved; no US clinical trials; no compounding pathway exists.",
     status: "no-pathway",
     statusNote:
-      "Not FDA-approved and has no US drug shortage listing. No 503A or 503B compounding pathway. Primarily available through RUO and grey-market vendors in the US.",
-    lastChanged: "2026-01-01",
+      "Not FDA-approved and has no US drug shortage listing. No 503A or 503B compounding pathway. Primarily available through RUO and grey-market vendors in the US. FDA withdrew selank acetate from its interim Category 2 safety-risk list in April 2026 after the nomination was withdrawn. It is not yet on the 503A Bulks List and has not been scheduled for Pharmacy Compounding Advisory Committee review.",
+    lastChanged: "2026-10-19",
     enforcement: [],
-    sources: ["https://www.doctronic.ai/blog/peptide-fda-status-tracker/"],
+    sources: [
+      "https://www.doctronic.ai/blog/peptide-fda-status-tracker/",
+      "https://www.fda.gov/drugs/human-drug-compounding/certain-bulk-drug-substances-use-compounding-may-present-significant-safety-risks",
+    ],
   },
 ];
