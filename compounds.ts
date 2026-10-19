@@ -80,7 +80,7 @@ export const compounds: Compound[] = [
       "A glucagon-like peptide-1 (GLP-1) receptor agonist medication used to treat type 2 diabetes, manage chronic weight, and lower the risk of major heart and kidney events. Approved as Ozempic (T2D) and Wegovy (obesity). One of the most widely prescribed weight-loss drugs. Shortage resolved February 2025, ending most compounding exceptions.",
     status: "contested",
     statusNote:
-      "Shortage resolved Feb 2025, ending the compounding exception for most pharmacies. FDA proposed (Apr 30, 2026) permanently excluding semaglutide from the 503B bulk substances list; the comment period, originally set to close June 29, 2026, was extended 30 days to July 30, 2026, and FDA has not issued a final rule as of this writing. Some pharmacies continue compounding under differentiated-formulation theories similar to tirzepatide.",
+      "Shortage resolved Feb 2025, ending the compounding exception for most pharmacies. FDA proposed (May 1, 2026) permanently excluding semaglutide from the 503B bulk substances list; the comment period, originally set to close June 30, 2026, was extended to July 30, 2026, and FDA has not issued a final rule as of this writing. Some pharmacies continue compounding under differentiated-formulation theories similar to tirzepatide.",
     lastChanged: "2026-10-19",
     shortageListHistory: "Removed from FDA shortage list February 2025.",
     enforcement: [
@@ -107,7 +107,7 @@ export const compounds: Compound[] = [
       "A GLP-1 receptor agonist approved as Victoza (T2D) and Saxenda (obesity). Older than semaglutide with a shorter half-life requiring daily injection. Proposed for permanent exclusion from the 503B bulk substances list.",
     status: "restricted",
     statusNote:
-      "Named alongside semaglutide and tirzepatide in FDA's proposed (Apr 30, 2026) permanent exclusion from the 503B outsourcing-facility bulk substances list. The comment period, originally set to close June 29, 2026, was extended 30 days to July 30, 2026, and FDA has not issued a final rule as of this writing.",
+      "Named alongside semaglutide and tirzepatide in FDA's proposed (May 1, 2026) permanent exclusion from the 503B outsourcing-facility bulk substances list. The comment period, originally set to close June 30, 2026, was extended to July 30, 2026, and FDA has not issued a final rule as of this writing.",
     lastChanged: "2026-10-19",
     enforcement: [],
     sources: [
