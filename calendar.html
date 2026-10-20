@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendar, Alarms &amp; Timers</title>
+<meta name="description" content="A calendar showing today's active alarms and why each one is set, plus three configurable alarms (each with its own sound) and three preset countdown timers (each with its own sound). Installable as an app on Android and desktop.">
+<meta name="keywords" content="alarm clock, countdown timer, calendar alarms, alarm sounds, timer sounds, android app">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://github.com/PapaMoth/super-duper-fishstick">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Calendar, Alarms &amp; Timers">
+<meta property="og:description" content="A calendar showing today's active alarms and why each one is set, plus three configurable alarms and three preset countdown timers, each with its own sound.">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Calendar, Alarms &amp; Timers">
+<meta name="twitter:description" content="A calendar showing today's active alarms and why each one is set, plus three configurable alarms and three preset countdown timers, each with its own sound.">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0f1a">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Calendar, Alarms & Timers",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "description": "A calendar page showing today's active alarms with a note explaining why each is set, three configurable alarms each with their own sound, and three preset countdown timers each with their own sound.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "Monthly calendar highlighting today",
+    "Today's alarms with a reason/note for each",
+    "Three alarms, each with an independent default tone or uploaded sound",
+    "Three countdown timers (30 min, 1 hour, 3 hours), each with an independent default tone or uploaded sound"
+  ]
+}
+</script>
+</head>
+<body>
+<div class="app-grid">
+
+  <!-- Top ad banner -->
+  <div class="ad ad-top">Ad Space — 728x90 Leaderboard</div>
+
+  <!-- Left ad rail -->
+  <div class="ad ad-left">Ad<br>160x600</div>
+
+  <!-- Center: nav, calendar, alarms, timers -->
+  <main class="center">
+    <nav class="site-nav">
+      <a href="index.html" class="nav-link">Dashboard</a>
+      <a href="settings.html" class="nav-link">Settings</a>
+      <a href="calendar.html" class="nav-link active">Calendar, Alarms &amp; Timers</a>
+    </nav>
+
+    <h1 class="sr-only">Calendar with Today's Alarms, Alarms, and Timers</h1>
+
+    <section class="calendar-section">
+      <h2 id="calendar-title">Calendar</h2>
+      <div id="calendar-grid" class="calendar-grid"></div>
+      <h3 class="todays-alarms-heading">Today's Alarms</h3>
+      <div id="todays-alarms-list" class="todays-alarms-list"></div>
+    </section>
+
+    <section class="timers-section">
+      <h2>Timers</h2>
+      <div class="timers-grid">
+        <div class="timer-card" data-minutes="30">
+          <div class="timer-label">30 min</div>
+          <div class="timer-display" data-display>30:00</div>
+          <div class="timer-controls">
+            <button class="btn small" data-action="start">Start</button>
+            <button class="btn small" data-action="pause">Pause</button>
+            <button class="btn small" data-action="reset">Reset</button>
+          </div>
+          <div class="sound-row">
+            <button class="btn small sound-btn" data-action="upload-sound">Upload Sound</button>
+            <button class="btn small sound-reset hidden" data-action="reset-sound">Use Default</button>
+            <input type="file" class="sound-input hidden" accept="audio/*" />
+          </div>
+          <div class="sound-name" data-sound-name>Default tone 1</div>
+        </div>
+        <div class="timer-card" data-minutes="60">
+          <div class="timer-label">1 hour</div>
+          <div class="timer-display" data-display>60:00</div>
+          <div class="timer-controls">
+            <button class="btn small" data-action="start">Start</button>
+            <button class="btn small" data-action="pause">Pause</button>
+            <button class="btn small" data-action="reset">Reset</button>
+          </div>
+          <div class="sound-row">
+            <button class="btn small sound-btn" data-action="upload-sound">Upload Sound</button>
+            <button class="btn small sound-reset hidden" data-action="reset-sound">Use Default</button>
+            <input type="file" class="sound-input hidden" accept="audio/*" />
+          </div>
+          <div class="sound-name" data-sound-name>Default tone 2</div>
+        </div>
+        <div class="timer-card" data-minutes="180">
+          <div class="timer-label">3 hours</div>
+          <div class="timer-display" data-display>180:00</div>
+          <div class="timer-controls">
+            <button class="btn small" data-action="start">Start</button>
+            <button class="btn small" data-action="pause">Pause</button>
+            <button class="btn small" data-action="reset">Reset</button>
+          </div>
+          <div class="sound-row">
+            <button class="btn small sound-btn" data-action="upload-sound">Upload Sound</button>
+            <button class="btn small sound-reset hidden" data-action="reset-sound">Use Default</button>
+            <input type="file" class="sound-input hidden" accept="audio/*" />
+          </div>
+          <div class="sound-name" data-sound-name>Default tone 3</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="alarms-section">
+      <h2>Alarms</h2>
+      <div class="alarms-grid">
+        <div class="alarm-card" data-index="0">
+          <div class="alarm-row">
+            <input type="time" class="alarm-time" aria-label="Alarm 1 time" />
+            <label class="switch">
+              <input type="checkbox" class="alarm-enabled" aria-label="Enable alarm 1" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="alarm-status" data-status>Off</div>
+          <input type="text" class="alarm-note" placeholder="Why this alarm? (e.g. Take medication)" aria-label="Alarm 1 note" />
+          <div class="sound-row">
+            <button class="btn small sound-btn" data-action="upload-sound">Upload Sound</button>
+            <button class="btn small sound-reset hidden" data-action="reset-sound">Use Default</button>
+            <input type="file" class="sound-input hidden" accept="audio/*" />
+          </div>
+          <div class="sound-name" data-sound-name>Default tone 1</div>
+        </div>
+        <div class="alarm-card" data-index="1">
+          <div class="alarm-row">
+            <input type="time" class="alarm-time" aria-label="Alarm 2 time" />
+            <label class="switch">
+              <input type="checkbox" class="alarm-enabled" aria-label="Enable alarm 2" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="alarm-status" data-status>Off</div>
+          <input type="text" class="alarm-note" placeholder="Why this alarm? (e.g. Take medication)" aria-label="Alarm 2 note" />
+          <div class="sound-row">
+            <button class="btn small sound-btn" data-action="upload-sound">Upload Sound</button>
+            <button class="btn small sound-reset hidden" data-action="reset-sound">Use Default</button>
+            <input type="file" class="sound-input hidden" accept="audio/*" />
+          </div>
+          <div class="sound-name" data-sound-name>Default tone 2</div>
+        </div>
+        <div class="alarm-card" data-index="2">
+          <div class="alarm-row">
+            <input type="time" class="alarm-time" aria-label="Alarm 3 time" />
+            <label class="switch">
+              <input type="checkbox" class="alarm-enabled" aria-label="Enable alarm 3" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="alarm-status" data-status>Off</div>
+          <input type="text" class="alarm-note" placeholder="Why this alarm? (e.g. Take medication)" aria-label="Alarm 3 note" />
+          <div class="sound-row">
+            <button class="btn small sound-btn" data-action="upload-sound">Upload Sound</button>
+            <button class="btn small sound-reset hidden" data-action="reset-sound">Use Default</button>
+            <input type="file" class="sound-input hidden" accept="audio/*" />
+          </div>
+          <div class="sound-name" data-sound-name>Default tone 3</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Right ad rail -->
+  <div class="ad ad-right">Ad<br>160x600</div>
+
+  <!-- Bottom ad banner -->
+  <div class="ad ad-bottom">Ad Space — 728x90 Leaderboard</div>
+
+</div>
+
+<div id="alarm-overlay" class="alarm-overlay hidden">
+  <div class="alarm-overlay-content">
+    <div class="alarm-ring-icon">⏰</div>
+    <div id="alarm-overlay-text">Alarm</div>
+    <div id="alarm-overlay-note" class="alarm-overlay-note"></div>
+    <button id="alarm-dismiss" class="btn">Dismiss</button>
+  </div>
+</div>
+
+<script src="background.js"></script>
+<script src="calendar.js"></script>
+<script src="pwa.js"></script>
+</body>
+</html>
