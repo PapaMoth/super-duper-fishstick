@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alarm Clock with Weather and Traffic</title>
+<meta name="description" content="A free, installable alarm clock app with weather and traffic info, a switchable digital or analog display, fullscreen screensaver mode, stock &amp; crypto price tracker (up to 6 tickers), calendar with alarms and timers. Works as an Android/desktop app.">
+<meta name="keywords" content="alarm clock, weather clock, traffic, digital clock, analog clock, screensaver, stock tracker, crypto tracker, installable web app, android app, PWA">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://github.com/PapaMoth/super-duper-fishstick">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Alarm Clock with Weather and Traffic">
+<meta property="og:description" content="A free alarm clock app with weather and traffic info, digital/analog display, screensaver, stock &amp; crypto tracker, calendar with alarms and timers.">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Alarm Clock with Weather and Traffic">
+<meta name="twitter:description" content="A free alarm clock app with weather and traffic info, digital/analog display, screensaver, stock &amp; crypto tracker, calendar with alarms and timers.">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0f1a">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Alarm Clock with Weather and Traffic",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "description": "A free alarm clock app with weather and traffic info, digital/analog display, screensaver, stock and crypto tracker, calendar with alarms and timers.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "Digital or analog clock display",
+    "Fullscreen screensaver mode",
+    "Location-based weather",
+    "Traffic map link",
+    "Stock and crypto ticker tracker (up to 6 tickers)",
+    "Single image or multi-image slideshow background"
+  ]
+}
+</script>
+</head>
+<body>
+<div class="app-grid">
+
+  <!-- Top ad banner -->
+  <div class="ad ad-top">Ad Space — 728x90 Leaderboard</div>
+
+  <!-- Left ad rail -->
+  <div class="ad ad-left">Ad<br>160x600</div>
+
+  <!-- Center: nav, clock, weather+traffic, tracker -->
+  <main class="center">
+    <nav class="site-nav">
+      <a href="index.html" class="nav-link active">Dashboard</a>
+      <a href="settings.html" class="nav-link">Settings</a>
+      <a href="calendar.html" class="nav-link">Calendar, Alarms &amp; Timers</a>
+    </nav>
+
+    <h1 class="sr-only">Desktop Clock with Weather, Traffic, and Stock &amp; Crypto Tracker</h1>
+
+    <section class="clock-section">
+      <div id="clock" class="clock">00:00:00</div>
+      <canvas id="analog-clock" class="analog-clock hidden" width="280" height="280"></canvas>
+      <div id="date" class="date">Loading date…</div>
+    </section>
+
+    <section class="tracker-section">
+      <h2>Stock &amp; Crypto Tracker</h2>
+      <div class="tracker-add-row">
+        <input type="text" id="tracker-symbol" class="tracker-input" placeholder="Symbol (e.g. AAPL or bitcoin)" />
+        <select id="tracker-type" class="tracker-select">
+          <option value="crypto">Crypto</option>
+          <option value="stock">Stock</option>
+        </select>
+        <button id="tracker-add-btn" class="btn small">Add</button>
+      </div>
+      <div id="tracker-count" class="tracker-count">0 / 6 tickers</div>
+      <div id="tracker-status" class="status"></div>
+      <div id="tracker-list" class="tracker-list"></div>
+    </section>
+
+    <section class="weather-section">
+      <h2>Weather &amp; Traffic</h2>
+      <div id="weather-body" class="weather-body">
+        <button id="weather-btn" class="btn">Use My Location</button>
+        <span id="weather-status" class="status"></span>
+        <div id="weather-result"></div>
+      </div>
+      <div id="traffic-body" class="traffic-body">
+        <span id="traffic-status" class="status">Share location above to see local traffic conditions.</span>
+        <div id="traffic-result"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Right ad rail -->
+  <div class="ad ad-right">Ad<br>160x600</div>
+
+  <!-- Bottom ad banner -->
+  <div class="ad ad-bottom">Ad Space — 728x90 Leaderboard</div>
+
+</div>
+
+<script src="background.js"></script>
+<script src="app.js"></script>
+<script src="pwa.js"></script>
+</body>
+</html>
